@@ -90,11 +90,8 @@ void show_explore_screen(Player& player, Room*& current_room, string question, s
     cout << col("white") << " > ";
 }
 
-void show_inventory_screen(Player& player, int& selected_item_index, string& error_message, string&question,
+void show_inventory_screen(Player& player, int& selected_item_index, vector<string>& inv_hint, string& question,
                             vector<string>& option, SortMode current_sort_mode, int& current_page, int& max_pages) {
-
-    question = "What would you like to do?";
-    option = { "1. Use an item","2. Combine items","3. Return to exploration","","","" };
 
     system("CLS");
 
@@ -188,16 +185,15 @@ void show_inventory_screen(Player& player, int& selected_item_index, string& err
 
     // Render the screen section
     cout << col("Lblue") << " | " << col("pink") << centre_text(question, 29) << col("Lblue") << "|" << col("violet")
-        << centre_text(lore_lines[0], 56) << col("Lblue") << "|" << string(29, ' ') << "|\n";
-    cout << " |" << string(30, ' ') << "|" << col("violet") << centre_text(lore_lines[1], 56)
-        << col("Lblue") << "|" << string(29, ' ') << "|\n";
-    cout << " |  " << col("white") << setw(28) << left << option[0] << col("Lblue") << "|" << col("violet")
-        << centre_text(lore_lines[2], 56) << col("Lblue") << "|" << col("Lred") << centre_text(error_message, 29)
-        << col("Lblue") << "|\n";
-    cout << " |  " << col("white") << setw(28) << left << option[1] << col("Lblue") << "|" << col("violet")
-        << centre_text(lore_lines[3], 56) << col("Lblue") << "|" << string(29, ' ') << "|\n";
-    cout << " |  " << col("white") << setw(28) << left << option[2] << col("Lblue") << "|" << col("violet")
-        << centre_text(lore_lines[4], 56) << col("Lblue") << "|" << string(29, ' ') << "|\n";
+        << centre_text(lore_lines[0], 56) << col("Lblue") << "|" << col("Lred") << centre_text(inv_hint[0], 29) << col("Lblue") << "|\n";
+    cout << " |" << string(30, ' ') << "|" << col("violet") << centre_text(lore_lines[1], 56) << col("Lblue") << "|"
+        << col("Lred") << centre_text(inv_hint[1], 29) << col("Lblue") << "|\n";
+    cout << " |  " << col("white") << setw(28) << left << option[0] << col("Lblue") << "|" << col("violet") << centre_text(lore_lines[2], 56)
+        << col("Lblue") << "|" << col("Lred") << centre_text(inv_hint[2], 29) << col("Lblue") << "|\n";
+    cout << " |  " << col("white") << setw(28) << left << option[1] << col("Lblue") << "|" << col("violet") << centre_text(lore_lines[3], 56)
+        << col("Lblue") << "|" << col("Lred") << centre_text(inv_hint[3], 29) << col("Lblue") << "|\n";
+    cout << " |  " << col("white") << setw(28) << left << option[2] << col("Lblue") << "|" << col("violet") << centre_text(lore_lines[4], 56)
+        << col("Lblue") << "|" << col("Lred") << centre_text(inv_hint[4], 29) << col("Lblue") << "|\n";
     cout << " |" << string(30, ' ') << "|" << string(56, ' ') << "|" << string(29, ' ') << "|\n";
 
     // Final bottom border

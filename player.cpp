@@ -14,7 +14,7 @@ string Player::get_name() { return name; }
 
 int Player::get_health() { return health; }
 
-vector<Item> Player::get_inventory() { return inventory; }
+vector<Item>& Player::get_inventory() { return inventory; }
 
 Coords Player::get_location() { return location; }
 

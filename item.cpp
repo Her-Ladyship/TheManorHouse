@@ -127,14 +127,14 @@ void initialise_combination_recipes() {
         { "The moment the two touched, they reacted.",
           "You don't know how, but this is now something",
           "you could throw at... something. You hope",
-          "you won’t need to. It pulses faintly in your",
+          "you won't need to. It pulses faintly in your",
           "bag like it resents existing." });
 
     Item toll_chime("Toll Chime", "A fused object that rings softly when moved.",
         { "The bell no longer swings. The coin is embedded",
           "at the rim, like it was always meant to be there.",
-          "It makes no sound when struck — only when",
-          "forgotten. It’s heavier than it looks.",
+          "It makes no sound when struck - only when",
+          "forgotten. It's heavier than it looks.",
           "And harder to lose." });
 
     combination_recipes[make_combo_key("Salt Packet", "Lemon")] = salt_bomb;

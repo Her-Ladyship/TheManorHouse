@@ -73,3 +73,8 @@ void load_main_question(string& question, vector<string>& option) {
     option[4] = "5. Check Inventory";
     option[5] = "6. Quit";
 }
+
+void load_inv_main_question(string& question, vector<string>& option) {
+    question = "What would you like to do?";
+    option = { "1. Use an item","2. Combine items","3. Return to exploration","","","" };
+}

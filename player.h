@@ -21,7 +21,7 @@ public:
 
     string get_name();
     int get_health();
-    vector<Item> get_inventory();
+    vector<Item>& get_inventory();
     Coords get_location();
 
     void set_name(string n);
