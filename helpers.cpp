@@ -1,0 +1,75 @@
+
+#include "helpers.h"
+
+void press_any_key() {
+    cout << "Press any key to continue...";
+    system("pause>nul");
+}
+
+bool yes_no_check(const string& prompt) {
+    string input;
+    char choice;
+
+    while (true) {
+        cout << prompt;
+        cin >> ws;
+        getline(cin, input);
+
+        if (input.empty()) {
+            cout << "Invalid input. Please enter 'Y' or 'N'.\n";
+            continue;
+        }
+
+        choice = toupper(input[0]);
+
+        if (choice == 'Y' || choice == 'N') {
+            cout << endl;
+            return (choice == 'Y');
+        }
+
+        cout << "Invalid input. Please enter 'Y' or 'N'.\n";
+    }
+}
+
+string centre_text(string input, int width) {
+    if (input.length() > width) {
+        input = input.substr(0, width);
+    }
+
+    int pad_left = (width - input.length()) / 2;
+    int pad_right = width - input.length() - pad_left;
+
+    return string(pad_left, ' ') + input + string(pad_right, ' ');
+}
+
+int numbers_error_check(int lower_bounds, int higher_bounds, GameState& game_state, string& error_message) {
+    int user_choice;
+    cin >> user_choice;
+
+    if (cin.fail() || user_choice < lower_bounds || user_choice > higher_bounds) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        if (game_state == EXPLORE) {
+            error_message = "Invalid input. Enter a number between " + to_string(lower_bounds) + " and " + to_string(higher_bounds) + ".";
+        }
+        else if (game_state == INVENTORY) {
+            error_message = "DON'T DO THAT. " + to_string(lower_bounds) + " TO " + to_string(higher_bounds) + ".";
+        }
+        return -1;
+    }
+
+    error_message = ""; // Clear error if success
+    return user_choice;
+}
+
+void load_main_question(string& question, vector<string>& option) {
+    question = "What do you want to do?";
+
+    option[0] = "1. Leave Room";
+    option[1] = "2. Interact with Curiosity";
+    option[2] = "3. Take Item";
+    option[3] = "4. Use Item";
+    option[4] = "5. Check Inventory";
+    option[5] = "6. Quit";
+}
