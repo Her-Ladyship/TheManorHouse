@@ -12,7 +12,7 @@ Coords Room::get_location() { return location; }
 
 vector<string> Room::get_exits() { return exits; }
 
-vector<Item> Room::get_items() { return items; }
+vector<Item>& Room::get_items() { return items; }
 
 vector<Object> Room::get_objects() { return objects; }
 
@@ -31,7 +31,7 @@ Room porch("Porch",
     "Something about the silence feels deliberate - like it's waiting for you to speak first.",
     "The doorknob ahead is warm to the touch. The wind, meanwhile, is not."},
     { 0, 0 }, { "North" },
-    {},
+    { coin, bell, lemon, salt_packet },
     { chair, knocker}
 );
 
@@ -42,7 +42,7 @@ Room hallway("Hallway",
     "Light filters in through grime-caked windows, casting shadows that don't quite match the shapes.",
     "Behind you, the porch creaks once. Then nothing."},
     { 0, 1 }, { "South", "East", "West" },
-    {},
+    { broken_fork, wax_finger, whistle },
     {}
 );
 
@@ -116,7 +116,7 @@ string room_interactable_list(Room*& current_room) {
 }
 
 void change_room(string& question, vector<string>& option, Player& player, Room*& current_room,
-    string& error_message, GameState& game_state) {
+    string& error_message, GameState& game_state, vector<string>& prompt) {
 
     question = "Which direction do you want to move?";
 
@@ -133,7 +133,7 @@ void change_room(string& question, vector<string>& option, Player& player, Room*
     while (waiting_for_input) {
 
         if (redraw) {
-            show_explore_screen(player, current_room, question, error_message, option);
+            show_explore_screen(player, current_room, question, error_message, option, prompt);
             redraw = false;
         }        
 

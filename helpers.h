@@ -29,3 +29,5 @@ string centre_text(string input, int width);
 int numbers_error_check(int lower_bounds, int higher_bounds, GameState& game_state, string& error_message);
 void load_main_question(string& question, vector<string>& option);
 void load_inv_main_question(string& question, vector<string>& option);
+string to_lower(const string& input);
+string capitalise_words(const string& input);

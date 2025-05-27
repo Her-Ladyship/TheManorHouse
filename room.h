@@ -29,7 +29,7 @@ public:
     vector<string> get_description();
     Coords get_location();
     vector<string> get_exits();
-    vector<Item> get_items();
+    vector<Item>& get_items();
     vector<Object> get_objects();
 
     void set_item(Item i);
@@ -42,7 +42,7 @@ string room_direction_list(Room*& current_room);
 string room_item_list(Room*& current_room);
 string room_interactable_list(Room*& current_room);
 void change_room(string& question, vector<string>& option, Player& player, Room*& current_room,
-    string& error_message, GameState& game_state);
+    string& error_message, GameState& game_state, vector<string>& prompt);
 
 // Room list reference
 extern vector<Room> room_list;

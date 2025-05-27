@@ -3,7 +3,8 @@
 
 const int ITEMS_PER_PAGE = 11;
 
-void show_explore_screen(Player& player, Room*& current_room, string question, string error_message, vector<string> option) {
+void show_explore_screen(Player& player, Room*& current_room, string question, string error_message,
+                            vector<string> option, vector<string>& prompt) {
 
     current_room = find_room_by_coords(room_list, player.get_location());
 
@@ -48,26 +49,21 @@ void show_explore_screen(Player& player, Room*& current_room, string question, s
     // Boxes
     cout << col("Lblue") << " |" << string(58, ' ') << "|" << string(58, ' ') << "|\n";
     cout << " |     " << col("pink") << "Exits     :  " << col("white") << setw(40) << left
-        << room_direction_list(current_room) << col("Lblue") << "|" << string(58, ' ') << "|\n";
+        << room_direction_list(current_room) << col("Lblue") << "|" << col("violet") << centre_text(prompt[0], 58) << col("Lblue") << "|\n";
     cout << " |     " << col("pink") << "Items     :  " << col("white") << setw(40) << left
-        << room_item_list(current_room) << col("Lblue") << "|                 " << col("violet")
-        << "THIS PART CAN SHOW THE                   " << col("Lblue") << "|\n";
+        << room_item_list(current_room) << col("Lblue") << "|" << col("violet") << centre_text(prompt[1], 58) << col("Lblue") << "|\n";
     cout << " |  " << col("pink") << "Curiosities  :  " << col("white") << setw(40) << left
-        << room_interactable_list(current_room) << col("Lblue") << "|                  "
-        << col("violet") << "SYSTEM RESPONSE FROM                    " << col("Lblue") << "|\n";
-    cout << " |" << string(58, ' ') << "|                     " << col("violet")
-        << "LAST USER INPUT                      " << col("Lblue") << "|\n";
+        << room_interactable_list(current_room) << col("Lblue") << "|" << col("violet") << centre_text(prompt[2], 58) << col("Lblue") << "|\n";
+    cout << " |" << string(58, ' ') << "|" << col("violet") << centre_text(prompt[3], 58) << col("Lblue") << "|\n";
 
     // Left break
     cout << col("cyan") << " +" << col("Lblue") << string(58, '-') << col("cyan") << "+"
-        << string(58, ' ') << col("Lblue") << "|\n";
+        << col("violet") << centre_text(prompt[4], 58) << col("Lblue") << "|\n";
 
     // More boxes
-    cout << " |" << col("pink") << centre_text(question, 58)
-        << col("Lblue") << "|" << string(58, ' ') << "|\n";
-    cout << " |" << string(58, ' ') << "|" << string(58, ' ') << "|\n";
-    cout << " |   " << col("white") << setw(55) << left << option[0]
-        << col("Lblue") << "|" << string(58, ' ') << "|\n";
+    cout << " |" << col("pink") << centre_text(question, 58) << col("Lblue") << "|" << col("violet") << centre_text(prompt[5], 58) << col("Lblue") << "|\n";
+    cout << " |" << string(58, ' ') << "|" << col("violet") << centre_text(prompt[6], 58) << col("Lblue") << "|\n";
+    cout << " |   " << col("white") << setw(55) << left << option[0] << col("Lblue") << "|" << string(58, ' ') << "|\n";
 
     // Right break
     cout << " |   " << col("white") << setw(55) << left << option[1] << col("cyan")
@@ -104,8 +100,9 @@ void show_inventory_screen(Player& player, int& selected_item_index, vector<stri
     if (current_sort_mode == ALPHABETICAL) { sort_type += "ALPHABETICAL"; }
     sort_type += ")";
 
-    string page_info = "Page " + to_string(current_page + 1) + " / "
-        + to_string((player.get_inventory().size() - 1) / ITEMS_PER_PAGE + 1);
+    int inv_size = player.get_inventory().size();
+    int total_pages = max(1, (inv_size + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE);
+    string page_info = "Page " + to_string(current_page + 1) + " / " + to_string(total_pages);
 
     // Title line
     cout << col("Lblue") << " |     " << col("pink") << setw(30) << left << page_info << string(19, ' ')

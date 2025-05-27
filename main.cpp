@@ -1,13 +1,14 @@
 
 #include "room.h"
 #include "screens.h"
+#include "inventory.h"
 
 // PROTOTYPES
 string game_setup();
 void play_check();
-void combine_items(Player& player, int& selected_index, vector<string>& inv_hint, string& question, vector<string>& option);
 void game_loop();
 void debug_load_items();
+void take_item();
 
 // GLOBALS
 GameState game_state = EXPLORE;
@@ -20,6 +21,7 @@ int max_pages = 0;
 string error_message, question;
 vector<string> option = {"","","","","",""};
 vector<string> inv_hint = { "","","","","" };
+vector<string> prompt = {"","","","","","",""};
 Player player;
 Room* current_room;
 
@@ -28,9 +30,8 @@ int main() {
 
     // DEBUG
     player.set_name("River");
-    load_main_question(question, option);
-    debug_load_items();
     initialise_combination_recipes();
+    load_main_question(question, option);
 
 	while (!game_over) {
         game_loop();
@@ -73,151 +74,10 @@ void play_check() {
     else {
         current_room = find_room_by_coords(room_list, player.get_location());
         game_state = EXPLORE;
+        initialise_combination_recipes();
         load_main_question(question, option);
     }
 }
-
-void combine_items(Player& player, int& selected_index, vector<string>& inv_hint, string& question, vector<string>& option) {
-
-    vector<Item> displayed_inventory = player.get_inventory();
-
-    if (current_sort_mode == ALPHABETICAL) {
-        sort(displayed_inventory.begin(), displayed_inventory.end(),
-            [](Item& a, Item& b) {
-                return a.get_name() < b.get_name();
-            });
-    }
-
-    vector<Item>& inventory = player.get_inventory();
-
-    if (inventory.size() < 2) {
-        inv_hint = {"", "You need at least two items", "", "to attempt a combination", ""};
-        return;
-    }
-
-    Item first = displayed_inventory[selected_index];
-    inv_hint = {"Select an item to", "", "combine with", "", first.get_name()};
-
-    bool selecting = true;
-    int second_index = selected_index;
-    int new_second_index = second_index / ITEMS_PER_PAGE;
-    bool redraw = true;
-
-    while (selecting) {
-        question = "What will you combine?";
-        option = {"1. Choose second item", "", "3. Return to inventory"};
-        if (redraw) {
-            show_inventory_screen(player, second_index, inv_hint, question, option, current_sort_mode,
-                new_second_index, max_pages);
-            redraw = false;
-        }
-
-        char key = _getch();
-        if (key == 0 || key == -32) {
-            key = _getch();
-
-            switch (key) {
-            case 72:  // Up arrow
-                if (second_index > 0) {
-                    second_index--;
-                    int new_page = second_index / ITEMS_PER_PAGE;
-                    if (new_page != new_second_index) new_second_index = new_page;
-                    redraw = true;
-                }
-                break;
-
-            case 80:  // Down arrow
-                if (second_index < inventory.size() - 1) {
-                    second_index++;
-                    int new_page = second_index / ITEMS_PER_PAGE;
-                    if (new_page != new_second_index) new_second_index = new_page;
-                    redraw = true;
-                }
-                break;
-
-            case 75: // Left arrow
-                if (new_second_index > 0) {
-                    new_second_index--;
-                    second_index = new_second_index * ITEMS_PER_PAGE;
-                    redraw = true;
-                }
-                break;
-
-            case 77: // Right arrow
-                if (new_second_index < max_pages) {
-                    new_second_index++;
-                    second_index = new_second_index * ITEMS_PER_PAGE;
-                    redraw = true;
-                }
-                break;
-            }
-        }
-        else {
-            switch (key) {
-            case '1':
-                if (second_index == selected_index) {
-                    inv_hint = { "You can't combine the", "", first.get_name(), "", "with itself" };
-                    load_inv_main_question(question, option);
-                    redraw = true;
-                    return;
-                }
-                else {
-                    Item second = displayed_inventory[second_index];
-                    auto key = make_combo_key(first.get_name(), second.get_name());
-
-                    if (combination_recipes.find(key) != combination_recipes.end()) {
-                        Item result = combination_recipes[key];
-
-                        // Find the positions of the selected items by name
-                        int index1 = -1, index2 = -1;
-                        for (int i = 0; i < inventory.size(); ++i) {
-                            if (inventory[i].get_name() == first.get_name() && index1 == -1) {
-                                index1 = i;
-                            }
-                            else if (inventory[i].get_name() == second.get_name() && index2 == -1) {
-                                index2 = i;
-                            }
-                        }
-
-                        // Now remove the items in correct order
-                        if (index1 > index2) {
-                            inventory.erase(inventory.begin() + index1);
-                            inventory.erase(inventory.begin() + index2);
-                        }
-                        else {
-                            inventory.erase(inventory.begin() + index2);
-                            inventory.erase(inventory.begin() + index1);
-                        }
-
-                        player.add_to_inventory(result);
-                        inv_hint = { "", "The items combined into", "", result.get_name(), ""};
-                        load_inv_main_question(question, option);
-                        redraw = true;
-                    }
-                    else {
-                        inv_hint = {"", "Nothing happened", "", "They don't seem to combine", ""};
-                        load_inv_main_question(question, option);
-                        selected_index = second_index;
-                        current_page = selected_index / ITEMS_PER_PAGE;
-                        redraw = true;
-                    }
-
-                    selecting = false;
-                }
-                break;
-            case '3':
-                inv_hint = {"", "", "Combination cancelled", "", ""};
-                load_inv_main_question(question, option);
-                selected_index = second_index;
-                current_page = selected_index / ITEMS_PER_PAGE;
-                redraw = true;
-                selecting = false;
-                break;
-            }
-        }
-    }
-}
-
 
 void game_loop() {
 
@@ -228,32 +88,34 @@ void game_loop() {
         break;
     }
     case EXPLORE: {
-        for (int i = 0; i < 5; i++) { inv_hint[i] = ""; }
-        show_explore_screen(player, current_room, question, error_message, option);
-
+        prompt = {"","","","","","",""};
+        bool redraw = true;
         bool waiting_for_input = true;
 
         while (waiting_for_input) {
-            char key = _getch();
 
+            if (redraw) {
+                show_explore_screen(player, current_room, question, error_message, option, prompt);
+                redraw = false;
+            }
+
+            char key = _getch();
             switch (key) {
             case '1':
-                change_room(question, option, player, current_room, error_message, game_state);
+                change_room(question, option, player, current_room, error_message, game_state, prompt);
                 waiting_for_input = false;
+                redraw = true;
                 break;
-            case '2':
-                // interact();  not implemented yet
-                waiting_for_input = false;
-                break;
+            //case '2':
+            //    // interact();  not implemented yet
+            //    waiting_for_input = false;
+            //    break;
             case '3':
-                // take_item();  not implemented yet
+                take_item();
                 waiting_for_input = false;
+                redraw = true;
                 break;
             case '4':
-                // use_item();  not implemented yet
-                waiting_for_input = false;
-                break;
-            case '5':
                 game_state = INVENTORY;
                 waiting_for_input = false;
                 break;
@@ -262,7 +124,6 @@ void game_loop() {
                 waiting_for_input = false;
                 break;
             default:
-                // invalid key, do nothing — loop continues
                 break;
             }
         }
@@ -270,8 +131,9 @@ void game_loop() {
         break;
     }
     case INVENTORY: {
+        inv_hint = { "","","","","" };
         bool in_inventory = true;
-        bool redraw = true;  // force initial draw
+        bool redraw = true;
         question = "What would you like to do?";
         option = { "1. Use an item","2. Combine items","3. Return to exploration","","","" };
 
@@ -283,57 +145,59 @@ void game_loop() {
             }
 
             char key = _getch();
-
-            if (key == 0 || key == -32) {  // arrow key or special key
+            if (key == 0 || key == -32) {  // arrow key
                 key = _getch();  // get the actual key code
 
-                switch (key) {
-                case 72:  // Up arrow
-                    if (selected_item_index > 0) {
-                        selected_item_index--;
-                        int new_page = selected_item_index / ITEMS_PER_PAGE;
-                        if (new_page != current_page) current_page = new_page;
-                        redraw = true;
+                if (!player.get_inventory().empty()) {
+                    switch (key) {
+                    case 72:  // Up arrow
+                        if (selected_item_index > 0) {
+                            selected_item_index--;
+                            int new_page = selected_item_index / ITEMS_PER_PAGE;
+                            if (new_page != current_page) current_page = new_page;
+                            redraw = true;
+                        }
+                        break;
+                    case 80:  // Down arrow
+                        if (selected_item_index < player.get_inventory().size() - 1) {
+                            selected_item_index++;
+                            int new_page = selected_item_index / ITEMS_PER_PAGE;
+                            if (new_page != current_page) current_page = new_page;
+                            redraw = true;
+                        }
+                        break;
+                    case 75: // Left arrow
+                        if (current_page > 0) {
+                            current_page--;
+                            selected_item_index = current_page * ITEMS_PER_PAGE;
+                            redraw = true;
+                        }
+                        break;
+                    case 77: // Right arrow
+                        if (current_page < max_pages) {
+                            current_page++;
+                            selected_item_index = current_page * ITEMS_PER_PAGE;
+                            redraw = true;
+                        }
+                        break;
                     }
-                    break;
-                case 80:  // Down arrow
-                    if (selected_item_index < player.get_inventory().size() - 1) {
-                        selected_item_index++;
-                        int new_page = selected_item_index / ITEMS_PER_PAGE;
-                        if (new_page != current_page) current_page = new_page;
-                        redraw = true;
-                    }
-                    break;
-                case 75: // Left arrow
-                    if (current_page > 0) {
-                        current_page--;
-                        selected_item_index = current_page * ITEMS_PER_PAGE;
-                        redraw = true;
-                    }
-                    break;
-                case 77: // Right arrow
-                    if (current_page < max_pages) {
-                        current_page++;
-                        selected_item_index = current_page * ITEMS_PER_PAGE;
-                        redraw = true;
-                    }
-                    break;
                 }
             }
             else {
                 switch (key) {
-                case '1':
+                //case '1':
                     // use_item();
                     //redraw = true;  // optionally redraw if it changes state
                     break;
                 case '2':
-                    combine_items(player, selected_item_index, inv_hint, question, option);
+                    combine_items(player, selected_item_index, inv_hint, question, option, current_sort_mode, max_pages, current_page);
                     redraw = true;
                     break;
                 case '3':
                     in_inventory = false;
                     game_state = EXPLORE;
                     load_main_question(question, option);
+                    error_message = "";
                     break;
                 case 's': case 'S':
                     current_sort_mode = (current_sort_mode == CHRONOLOGICAL) ? ALPHABETICAL : CHRONOLOGICAL;
@@ -365,4 +229,41 @@ void debug_load_items() {
     player.add_to_inventory(lemon);
     player.add_to_inventory(whistle);
     player.add_to_inventory(tarot);
+}
+
+void take_item() {
+
+    vector<Item>& room_items = current_room->get_items();
+
+    if (room_items.empty()) {
+        error_message = "There's nothing here to take";
+        return;
+    }
+
+    error_message = "";
+
+    // Prompt message
+    question = "";
+    option = {"","","","","",""};
+    prompt = {"", "What would you like to take ?", "", "Type the item name and press Enter", "","",""};
+    show_explore_screen(player, current_room, question, error_message, option, prompt);
+
+    string input;
+    getline(cin, input);
+
+    string cleaned_input = capitalise_words(to_lower(input));
+
+    auto it = find_if(room_items.begin(), room_items.end(), [&](Item& item) {
+        return item.get_name() == cleaned_input;
+        });
+
+    if (it != room_items.end()) {
+        player.add_to_inventory(*it);
+        error_message = "You took the " + it->get_name();
+        room_items.erase(it);
+    }
+    else {
+        error_message = "There's no " + cleaned_input + " to take";
+    }
+    load_main_question(question, option);
 }

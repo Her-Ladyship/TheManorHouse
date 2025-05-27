@@ -1,5 +1,6 @@
 
 #include "helpers.h"
+#include <algorithm>
 
 void press_any_key() {
     cout << "Press any key to continue...";
@@ -69,12 +70,38 @@ void load_main_question(string& question, vector<string>& option) {
     option[0] = "1. Leave Room";
     option[1] = "2. Interact with Curiosity";
     option[2] = "3. Take Item";
-    option[3] = "4. Use Item";
-    option[4] = "5. Check Inventory";
+    option[3] = "4. Check Inventory";
+    option[4] = "";
     option[5] = "6. Quit";
 }
 
 void load_inv_main_question(string& question, vector<string>& option) {
     question = "What would you like to do?";
     option = { "1. Use an item","2. Combine items","3. Return to exploration","","","" };
+}
+
+string to_lower(const string& input) {
+    string result = input;
+    transform(result.begin(), result.end(), result.begin(), ::tolower);
+    return result;
+}
+
+string capitalise_words(const string& input) {
+    string result = input;
+    bool capitalise_next = true;
+
+    for (char& ch : result) {
+        if (isspace(ch)) {
+            capitalise_next = true;
+        }
+        else if (capitalise_next && isalpha(ch)) {
+            ch = toupper(ch);
+            capitalise_next = false;
+        }
+        else {
+            ch = tolower(ch);
+        }
+    }
+
+    return result;
 }
