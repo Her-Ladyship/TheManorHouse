@@ -31,7 +31,7 @@ Room porch("Porch",
     "Something about the silence feels deliberate - like it's waiting for you to speak first.",
     "The doorknob ahead is warm to the touch. The wind, meanwhile, is not."},
     { 0, 0 }, { "North" },
-    { coin, leaf},
+    {},
     { chair, knocker}
 );
 
