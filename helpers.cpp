@@ -1,5 +1,7 @@
 
 #include "helpers.h"
+
+#include <regex>
 #include <algorithm>
 
 void press_any_key() {
@@ -104,4 +106,13 @@ string capitalise_words(const string& input) {
     }
 
     return result;
+}
+
+string strip_ansi_codes(const string& input) {
+    return regex_replace(input, regex("\x1B\\[[0-9;]*m"), "");
+}
+
+string pad_visual(const string& styled, int width) {
+    int len = strip_ansi_codes(styled).length();
+    return styled + string(max(0, width - len), ' ');
 }

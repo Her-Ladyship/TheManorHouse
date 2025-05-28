@@ -14,13 +14,38 @@ vector<string> Room::get_exits() { return exits; }
 
 vector<Item>& Room::get_items() { return items; }
 
-vector<Object> Room::get_objects() { return objects; }
+vector<Object>& Room::get_objects() { return objects; }
 
 // ----- Room Setters -----
 
 void Room::set_item(Item i) { items.push_back(i); }
 
 void Room::set_object(Object o) { objects.push_back(o); }
+
+void Room::add_exit(string direction) { exits.push_back(direction); }
+
+// ----- Locked Exits -----
+
+bool Room::is_exit_locked(const string& direction) const {
+    return find(locked_exits.begin(), locked_exits.end(), direction) != locked_exits.end();
+}
+
+void Room::lock_exit(const string& direction) {
+    if (!is_exit_locked(direction)) {
+        locked_exits.push_back(direction);
+    }
+}
+
+void Room::unlock_exit(const string& direction) {
+    auto it = find(locked_exits.begin(), locked_exits.end(), direction);
+    if (it != locked_exits.end()) {
+        locked_exits.erase(it);
+    }
+}
+
+bool Room::has_exit(const string& direction) const {
+    return find(exits.begin(), exits.end(), direction) != exits.end();
+}
 
 // ----- Room List Definitions -----
 
@@ -31,7 +56,7 @@ Room porch("Porch",
     "Something about the silence feels deliberate - like it's waiting for you to speak first.",
     "The doorknob ahead is warm to the touch. The wind, meanwhile, is not."},
     { 0, 0 }, { "North" },
-    { coin, bell, lemon, salt_packet },
+    { bell, lemon, salt_packet },
     { chair, knocker}
 );
 
@@ -84,12 +109,23 @@ Room* find_room_by_coords(vector<Room>& rooms, Coords target) {
 
 string room_direction_list(Room*& current_room) {
     string direction_list;
-    for (string direction : current_room->get_exits()) {
-        direction_list += direction + ", ";
+
+    for (string& const direction : current_room->get_exits()) {
+        bool is_locked = current_room->is_exit_locked(direction);
+
+        if (is_locked) {
+            direction_list += "\x1B[9m" + direction + "\x1B[0m, ";
+        }
+        else {
+            direction_list += direction + ", ";
+        }
     }
+
+    // Remove trailing comma + space
     if (direction_list.length() >= 2) {
         direction_list = direction_list.substr(0, direction_list.length() - 2);
     }
+
     return direction_list;
 }
 
@@ -119,13 +155,8 @@ void change_room(string& question, vector<string>& option, Player& player, Room*
     string& error_message, GameState& game_state, vector<string>& prompt) {
 
     question = "Which direction do you want to move?";
-
-    option[0] = "1. North";
-    option[1] = "2. South";
-    option[2] = "3. East";
-    option[3] = "4. West";
-    option[4] = "";
-    option[5] = "5. Back to Menu";
+    option = { "1. North" , "2. South", "3. East", "4. West", "", "5. Back to Menu" };
+    prompt = { "","","","","","","" };
 
     bool waiting_for_input = true;
     bool redraw = true;
@@ -176,16 +207,35 @@ void change_room(string& question, vector<string>& option, Player& player, Room*
             Room* next_room = find_room_by_coords(room_list, new_location);
 
             if (next_room != nullptr) {
-                player.set_location(new_location);
-                load_main_question(question, option);
-                error_message = "";
+                // Figure out which direction was attempted
+                string direction;
+                if (new_location.y > current.y) direction = "North";
+                else if (new_location.y < current.y) direction = "South";
+                else if (new_location.x > current.x) direction = "East";
+                else if (new_location.x < current.x) direction = "West";
+
+                if (current_room->is_exit_locked(direction)) {
+                    error_message = "The door to the " + direction + " is locked.";
+                    waiting_for_input = true; // Stay in the loop
+                }
+                else {
+                    player.set_location(new_location);
+                    current_room = next_room;
+                    load_main_question(question, option);
+                    error_message = "";
+                }
             }
             else {
                 error_message = "You can't go that way. There's nothing there.";
-                waiting_for_input = true; // loop again since move failed
+                waiting_for_input = true;
             }
+
         }
     }
 
     load_main_question(question, option);
+}
+
+void initialise_locked_doors() {
+    room_list[0].lock_exit("North");
 }

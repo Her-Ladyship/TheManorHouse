@@ -9,6 +9,7 @@ void play_check();
 void game_loop();
 void debug_load_items();
 void take_item();
+void interact();
 
 // GLOBALS
 GameState game_state = EXPLORE;
@@ -31,6 +32,7 @@ int main() {
     // DEBUG
     player.set_name("River");
     initialise_combination_recipes();
+    initialise_locked_doors();
     load_main_question(question, option);
 
 	while (!game_over) {
@@ -88,7 +90,7 @@ void game_loop() {
         break;
     }
     case EXPLORE: {
-        prompt = {"","","","","","",""};
+        //prompt = {"","","","","","",""};
         bool redraw = true;
         bool waiting_for_input = true;
 
@@ -102,14 +104,16 @@ void game_loop() {
             char key = _getch();
             switch (key) {
             case '1':
+                error_message = "";
                 change_room(question, option, player, current_room, error_message, game_state, prompt);
                 waiting_for_input = false;
                 redraw = true;
                 break;
-            //case '2':
-            //    // interact();  not implemented yet
-            //    waiting_for_input = false;
-            //    break;
+            case '2':
+                interact();
+                waiting_for_input = false;
+                redraw = true;
+                break;
             case '3':
                 take_item();
                 waiting_for_input = false;
@@ -212,7 +216,7 @@ void game_loop() {
         // combat stuff here
         break;
     }
-    }    
+    }
 }
 
 void debug_load_items() {
@@ -245,7 +249,7 @@ void take_item() {
     // Prompt message
     question = "";
     option = {"","","","","",""};
-    prompt = {"", "What would you like to take ?", "", "Type the item name and press Enter", "","",""};
+    prompt = {"", "What would you like to take?", "", "Type the item name and press Enter", "","",""};
     show_explore_screen(player, current_room, question, error_message, option, prompt);
 
     string input;
@@ -266,4 +270,67 @@ void take_item() {
         error_message = "There's no " + cleaned_input + " to take";
     }
     load_main_question(question, option);
+    prompt = { "","","","","","","" };
+}
+
+void interact() {
+    string interaction_target;
+    question = "";
+    option = { "","","","","","" };
+    error_message = "";
+    prompt = { "", "", "What do you want to interact with?", "", "Type the curiosity name and press Enter","","" };
+
+    // Show the screen with the prompt
+    show_explore_screen(player, current_room, question, error_message, option, prompt);
+
+    // Get user input
+    getline(cin, interaction_target);
+    interaction_target = to_lower(interaction_target);
+    bool found = false;
+
+    for (Object& obj : current_room->get_objects()) {
+        if (to_lower(obj.get_name()) == interaction_target) {
+            found = true;
+
+            string type = obj.get_interaction_type();
+            
+            if (type == "unlock") {
+                if (!obj.has_been_used()) {
+                    obj.mark_used();
+
+                    // Adjust direction as needed
+                    current_room->unlock_exit(obj.get_unlock_direction());
+
+                    prompt = { obj.get_result_text()[0], obj.get_result_text()[1], obj.get_result_text()[2], obj.get_result_text()[3],
+                                obj.get_result_text()[4], obj.get_result_text()[5], obj.get_result_text()[6] };
+                    load_main_question(question, option);
+                    show_explore_screen(player, current_room, question, error_message, option, prompt);
+                }
+                else {
+                    prompt = { obj.get_repeat_text()[0], obj.get_repeat_text()[1], obj.get_repeat_text()[2], obj.get_repeat_text()[3],
+                                obj.get_repeat_text()[4], obj.get_repeat_text()[5], obj.get_repeat_text()[6] };
+                    load_main_question(question, option);
+                }
+            }
+            else if (type == "flavour") {
+                prompt = { obj.get_result_text()[0], obj.get_result_text()[1], obj.get_result_text()[2], obj.get_result_text()[3],
+                                obj.get_result_text()[4], obj.get_result_text()[5], obj.get_result_text()[6] };
+                load_main_question(question, option);
+            }
+
+            else {
+                prompt = { "", "", "", "", "", "", ""};
+                error_message = "Nothing happens. Yet.";
+                load_main_question(question, option);
+                prompt = { "","","","","","","" };
+            }
+            break;
+        }
+    }
+
+    if (!found) {
+        error_message = "There's no " + capitalise_words(interaction_target) + " to interact with.";
+        load_main_question(question, option);
+        prompt = { "","","","","","","" };
+    }
 }

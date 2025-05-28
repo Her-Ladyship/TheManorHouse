@@ -31,3 +31,5 @@ void load_main_question(string& question, vector<string>& option);
 void load_inv_main_question(string& question, vector<string>& option);
 string to_lower(const string& input);
 string capitalise_words(const string& input);
+string strip_ansi_codes(const string& input);
+string pad_visual(const string& styled, int width);

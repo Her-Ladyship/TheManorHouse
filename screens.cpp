@@ -48,8 +48,8 @@ void show_explore_screen(Player& player, Room*& current_room, string question, s
 
     // Boxes
     cout << col("Lblue") << " |" << string(58, ' ') << "|" << string(58, ' ') << "|\n";
-    cout << " |     " << col("pink") << "Exits     :  " << col("white") << setw(40) << left
-        << room_direction_list(current_room) << col("Lblue") << "|" << col("violet") << centre_text(prompt[0], 58) << col("Lblue") << "|\n";
+    cout << " |     " << col("pink") << "Exits     :  " << col("white")  << pad_visual(room_direction_list(current_room), 40)
+        << col("Lblue") << "|" << col("violet") << centre_text(prompt[0], 58) << col("Lblue") << "|\n";
     cout << " |     " << col("pink") << "Items     :  " << col("white") << setw(40) << left
         << room_item_list(current_room) << col("Lblue") << "|" << col("violet") << centre_text(prompt[1], 58) << col("Lblue") << "|\n";
     cout << " |  " << col("pink") << "Curiosities  :  " << col("white") << setw(40) << left
