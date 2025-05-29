@@ -41,13 +41,14 @@ public:
     void lock_exit(const string& direction);
     void unlock_exit(const string& direction);
     bool has_exit(const string& direction) const;
+
+    string room_direction_list();
+    string room_item_list();
+    string room_interactable_list();
 };
 
 // Function prototypes
 Room* find_room_by_coords(vector<Room>& rooms, Coords target);
-string room_direction_list(Room*& current_room);
-string room_item_list(Room*& current_room);
-string room_interactable_list(Room*& current_room);
 void change_room(string& question, vector<string>& option, Player& player, Room*& current_room,
     string& error_message, GameState& game_state, vector<string>& prompt);
 void initialise_locked_doors();

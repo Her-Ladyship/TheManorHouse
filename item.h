@@ -37,9 +37,16 @@ extern Item spare_key;
 extern Item lemon;
 extern Item whistle;
 extern Item tarot;
+extern Item broom;
+extern Item knife;
 
 // Combining stuff
 extern map<pair<string, string>, Item> combination_recipes;
 pair<string, string> make_combo_key(string a, string b);
 void initialise_combination_recipes();
+
+// Puzzle stuff
+extern map<pair<string, string>, bool> puzzle_recipes;
+pair<string, string> make_puzzle_key(string item, string object);
+void initialise_puzzle_solutions();
 

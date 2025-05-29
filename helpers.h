@@ -23,7 +23,6 @@ enum GameState {
 enum SortMode { CHRONOLOGICAL, ALPHABETICAL };
 
 // FUNCTION PROTOTYPES
-void press_any_key();
 bool yes_no_check(const string& prompt);
 string centre_text(string input, int width);
 int numbers_error_check(int lower_bounds, int higher_bounds, GameState& game_state, string& error_message);

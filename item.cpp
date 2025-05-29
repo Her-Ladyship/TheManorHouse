@@ -1,8 +1,6 @@
 
 #include "item.h"
 
-map<pair<string, string>, Item> combination_recipes;
-
 // ----- Method Definitions -----
 
 string Item::get_name() { return name; }
@@ -13,7 +11,7 @@ vector<string> Item::get_lore() { return lore; }
 
 // ----- Item Definitions -----
 
-Item coin("Coin", "A worn brass coin with no visible markings.",
+Item coin("Coin", "A worn brass coin with no visible markings.", // PORCH
     {"The coin bears no nation, no ruler, no date.",
     "There is no front, no back, and no clear way",
     "to spend it. It has been found in coat linings,",
@@ -21,7 +19,7 @@ Item coin("Coin", "A worn brass coin with no visible markings.",
     "No one ever remembers dropping it."}
 );
 
-Item leaf("Leaf", "A dry, red leaf that doesn't match the season.",
+Item leaf("Leaf", "A dry, red leaf that doesn't match the season.", // PORCH
     {"The leaf remains untouched by decay. Its colour",
     "is vivid, unnatural, and never fades - even",
     "under moonlight. Scholars once attempted to",
@@ -29,7 +27,7 @@ Item leaf("Leaf", "A dry, red leaf that doesn't match the season.",
     "The rest declined to try again."}
 );
 
-Item bell("Bell", "A small handbell with a cracked mouth.",
+Item bell("Bell", "A small handbell with a cracked mouth.", // HALLWAY
     {"Crafted from bronze and left unmarked.",
     "Too light for ceremony. Too plain for display.",
     "No chime remains. Only a faint metallic scent,",
@@ -37,15 +35,15 @@ Item bell("Bell", "A small handbell with a cracked mouth.",
     "Its maker is unknown. Its purpose, uncertain."}
 );
 
-Item mirror_shard("Mirror Shard", "A jagged sliver of glass wrapped in black thread.",
+Item mirror_shard("Mirror Shard", "A jagged sliver of glass.", // HALLWAY
     { "It reflects nothing. Not you, not the room,",
     "not even the light. When you turn it just so,",
     "you hear breathing - slow, shallow, and close.",
-    "The thread winds tighter on its own if ignored",
-    "as if trying to crack the shard again." }
+    "It seems to bend on its own if ignored",
+    "as if trying to crack itself again." }
 );
 
-Item broken_fork("Broken Fork", "A silver fork with just one surviving tine.",
+Item broken_fork("Broken Fork", "A silver fork with just one surviving tine.", // KITCHEN
     { "Not bent, but with two tines snapped off.",
     "The handle is engraved with initials that",
     "shift slightly each time you blink.",
@@ -53,7 +51,7 @@ Item broken_fork("Broken Fork", "A silver fork with just one surviving tine.",
     "entranced by the dull shine." }
 );
 
-Item lavender("Lavender Sachet", "A faded cloth pouch tied with lavender ribbon.",
+Item lavender("Lavender Sachet", "A faded cloth pouch tied with lavender ribbon.", // HALLWAY
     { "The scent is gentle, persistent, and oddly",
     "personal. It calms your breath and steadies",
     "your thoughts - even the ones that don't",
@@ -77,7 +75,7 @@ Item notebook("Notebook", "A water-damaged notebook with soft blue covers.",
     "The spine creaks like an old apology." }
 );
 
-Item salt_packet("Salt Packet", "A single-serve packet of salt, unopened.",
+Item salt_packet("Salt Packet", "A single-serve packet of salt, unopened.", // KITCHEN
     { "It has no brand, no expiry date, no tear line.",
     "The grains inside move exictedly when shaken.",
     "You could swear it's heavier than it should be.",
@@ -85,15 +83,15 @@ Item salt_packet("Salt Packet", "A single-serve packet of salt, unopened.",
     "You're not sure what would happen if it did open." }
 );
 
-Item spare_key("Spare Key", "A tarnished brass key with no tag.",
+Item spare_key("Spare Key", "A tarnished brass key with no tag.", // HALLWAY
     { "You recognise it. You don't know why.",
-    "It fits no doors you've found... yet.",
+    "You don't know what it's the key for...",
     "Keeping it makes you feel watched, and yet",
     "leaving it behind feels like a betrayal.",
     "It rattles even when you walk carefully." }
 );
 
-Item lemon("Lemon", "A fresh lemon with a single bite missing.",
+Item lemon("Lemon", "A fresh lemon with a single bite missing.", // KITCHEN
     { "The bite is clean. Human-sized.",
     "There's no juice trail. No scent of citrus.",
     "It's never spoiled - not even browned.",
@@ -101,7 +99,7 @@ Item lemon("Lemon", "A fresh lemon with a single bite missing.",
     "always appears near the top of your bag." }
 );
 
-Item whistle("Whistle", "A polished metal whistle on a frayed cord.",
+Item whistle("Whistle", "A polished metal whistle on a frayed cord.", // KITCHEN
     { "The kind used by coaches, referees, or people trying",
     "to seem in control. The engraving is too worn to read.",
     "It works perfectly, though the sound is sharp and",
@@ -117,7 +115,24 @@ Item tarot("Tarot Card", "A card from a traditional tarot deck.",
     "You haven't turned it over since." }
 );
 
+Item broom("Broom", "A wooden broom with a scorched handle.", // PORCH
+    { "The bristles are worn down unevenly,",
+    "like it was used to scrub something that resisted.",
+    "The handle is blackened near the base.",
+    "Heat damage, maybe.",
+    "It seems too heavy for sweeping."});
+
+Item knife("Knife", "A kitchen knife with a thin, tapered blade.", // KITCHEN
+    { "You found it on the kitchen floor.",
+    "Not dropped. Placed.",
+    "",
+    "The edge gleams under the light.",
+    "It doesn’t look like it’s ever touched food." });
+
+
 // Combining stuff
+map<pair<string, string>, Item> combination_recipes;
+
 pair<string, string> make_combo_key(string a, string b) {
     return (a < b) ? make_pair(a, b) : make_pair(b, a);
 }
@@ -129,7 +144,7 @@ Item salt_bomb("Salt Bomb", "A volatile mix of salt and lemon, wrapped in paper.
       "you won't need to. It pulses faintly in your",
       "bag like it resents existing." });
 
-Item toll_chime("Toll Chime", "A fused object that rings softly when moved.",
+Item toll_chime("Toll Chime", "A fused object that rings softly when ignored.",
     { "The bell no longer swings. The coin is embedded",
       "at the rim, like it was always meant to be there.",
       "It makes no sound when struck - only when",
@@ -141,3 +156,15 @@ void initialise_combination_recipes() {
     combination_recipes[make_combo_key("Coin", "Bell")] = toll_chime;
 }
 
+// Puzzle Stuff
+map<pair<string, string>, bool> puzzle_recipes;
+
+pair<string, string> make_puzzle_key(string item, string object) {
+    return make_pair(item, object);
+}
+
+void initialise_puzzle_solutions() {
+    puzzle_recipes[make_puzzle_key("Broom", "Ceiling Fan")] = true;
+    puzzle_recipes[make_puzzle_key("Whistle", "Mirror")] = true;
+    puzzle_recipes[make_puzzle_key("Spare Key", "Keyhole")] = true;
+}

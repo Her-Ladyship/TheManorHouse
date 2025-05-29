@@ -26,6 +26,8 @@ public:
 
     void set_name(string n);
     void set_health(int h);
-    void add_to_inventory(Item i);
     void set_location(Coords c);
+
+    void add_to_inventory(Item i);
+    
 };

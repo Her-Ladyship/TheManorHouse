@@ -5,23 +5,16 @@
 // ----- Room Getters -----
 
 string Room::get_name() { return name; }
-
 vector<string> Room::get_description() { return description; }
-
 Coords Room::get_location() { return location; }
-
 vector<string> Room::get_exits() { return exits; }
-
 vector<Item>& Room::get_items() { return items; }
-
 vector<Object>& Room::get_objects() { return objects; }
 
 // ----- Room Setters -----
 
 void Room::set_item(Item i) { items.push_back(i); }
-
 void Room::set_object(Object o) { objects.push_back(o); }
-
 void Room::add_exit(string direction) { exits.push_back(direction); }
 
 // ----- Locked Exits -----
@@ -47,6 +40,51 @@ bool Room::has_exit(const string& direction) const {
     return find(exits.begin(), exits.end(), direction) != exits.end();
 }
 
+// ----- Other Class Functions -----
+
+string Room::room_direction_list() {
+    string direction_list;
+
+    for (string& const direction : get_exits()) {
+        bool is_locked = is_exit_locked(direction);
+
+        if (is_locked) {
+            direction_list += "\x1B[91m\x1B[9m" + direction + "\x1B[0m, ";
+        }
+        else {
+            direction_list += direction + ", ";
+        }
+    }
+
+    if (direction_list.length() >= 2) {
+        direction_list = direction_list.substr(0, direction_list.length() - 2);
+    }
+
+    return direction_list;
+}
+
+string Room::room_item_list() {
+    string item_list;
+    for (Item item : get_items()) {
+        item_list += item.get_name() + ", ";
+    }
+    if (item_list.length() >= 2) {
+        item_list = item_list.substr(0, item_list.length() - 2);
+    }
+    return item_list;
+}
+
+string Room::room_interactable_list() {
+    string object_list;
+    for (Object object : get_objects()) {
+        object_list += object.get_name() + ", ";
+    }
+    if (object_list.length() >= 2) {
+        object_list = object_list.substr(0, object_list.length() - 2);
+    }
+    return object_list;
+}
+
 // ----- Room List Definitions -----
 
 Room porch("Porch",
@@ -56,7 +94,7 @@ Room porch("Porch",
     "Something about the silence feels deliberate - like it's waiting for you to speak first.",
     "The doorknob ahead is warm to the touch. The wind, meanwhile, is not."},
     { 0, 0 }, { "North" },
-    { bell, lemon, salt_packet },
+    { leaf, broom },
     { chair, knocker}
 );
 
@@ -64,11 +102,11 @@ Room hallway("Hallway",
     {"The hallway is narrow, the walls pressing in like they've grown tired of standing apart.",
     "Dust clings to picture frames whose subjects have faded into blankness.",
     "A threadbare rug trails down the centre, marked with paths worn by long-forgotten feet.",
-    "Light filters in through grime-caked windows, casting shadows that don't quite match the shapes.",
+    "A small bureau stands off to the side, with a grimy mirror hanging above.",
     "Behind you, the porch creaks once. Then nothing."},
-    { 0, 1 }, { "South", "East", "West" },
-    { broken_fork, wax_finger, whistle },
-    {}
+    { 0, 1 }, { "South", "East", "West", "North"},
+    { bell, lavender },
+    { bureau, mirror, keyhole }
 );
 
 Room lounge("Lounge",
@@ -89,11 +127,11 @@ Room kitchen("Kitchen",
     "Someone set the table for one. There's dust on the plate, but the glass is still half full.",
     "A knife lies on the floor, a little too carefully placed to be an accident."},
     { 1, 1 }, { "West" },
-    {},
-    {}
+    { broken_fork, lemon, knife },
+    { kitchen_drawer, ceiling_fan, kitchen_setting }
 );
 
-// Master room list
+// ----- Master Room List -----
 vector<Room> room_list = { porch, hallway, lounge, kitchen };
 
 // ----- Room Utility Functions -----
@@ -105,50 +143,6 @@ Room* find_room_by_coords(vector<Room>& rooms, Coords target) {
         }
     }
     return nullptr;
-}
-
-string room_direction_list(Room*& current_room) {
-    string direction_list;
-
-    for (string& const direction : current_room->get_exits()) {
-        bool is_locked = current_room->is_exit_locked(direction);
-
-        if (is_locked) {
-            direction_list += "\x1B[9m" + direction + "\x1B[0m, ";
-        }
-        else {
-            direction_list += direction + ", ";
-        }
-    }
-
-    // Remove trailing comma + space
-    if (direction_list.length() >= 2) {
-        direction_list = direction_list.substr(0, direction_list.length() - 2);
-    }
-
-    return direction_list;
-}
-
-string room_item_list(Room*& current_room) {
-    string item_list;
-    for (Item item : current_room->get_items()) {
-        item_list += item.get_name() + ", ";
-    }
-    if (item_list.length() >= 2) {
-        item_list = item_list.substr(0, item_list.length() - 2);
-    }
-    return item_list;
-}
-
-string room_interactable_list(Room*& current_room) {
-    string object_list;
-    for (Object object : current_room->get_objects()) {
-        object_list += object.get_name() + ", ";
-    }
-    if (object_list.length() >= 2) {
-        object_list = object_list.substr(0, object_list.length() - 2);
-    }
-    return object_list;
 }
 
 void change_room(string& question, vector<string>& option, Player& player, Room*& current_room,
@@ -238,4 +232,6 @@ void change_room(string& question, vector<string>& option, Player& player, Room*
 
 void initialise_locked_doors() {
     room_list[0].lock_exit("North");
+    room_list[1].lock_exit("West");
+    room_list[1].lock_exit("North");
 }

@@ -48,12 +48,12 @@ void show_explore_screen(Player& player, Room*& current_room, string question, s
 
     // Boxes
     cout << col("Lblue") << " |" << string(58, ' ') << "|" << string(58, ' ') << "|\n";
-    cout << " |     " << col("pink") << "Exits     :  " << col("white")  << pad_visual(room_direction_list(current_room), 40)
+    cout << " |     " << col("pink") << "Exits     :  " << col("white")  << pad_visual(current_room->room_direction_list(), 40)
         << col("Lblue") << "|" << col("violet") << centre_text(prompt[0], 58) << col("Lblue") << "|\n";
     cout << " |     " << col("pink") << "Items     :  " << col("white") << setw(40) << left
-        << room_item_list(current_room) << col("Lblue") << "|" << col("violet") << centre_text(prompt[1], 58) << col("Lblue") << "|\n";
+        << current_room->room_item_list() << col("Lblue") << "|" << col("violet") << centre_text(prompt[1], 58) << col("Lblue") << "|\n";
     cout << " |  " << col("pink") << "Curiosities  :  " << col("white") << setw(40) << left
-        << room_interactable_list(current_room) << col("Lblue") << "|" << col("violet") << centre_text(prompt[2], 58) << col("Lblue") << "|\n";
+        << current_room->room_interactable_list() << col("Lblue") << "|" << col("violet") << centre_text(prompt[2], 58) << col("Lblue") << "|\n";
     cout << " |" << string(58, ' ') << "|" << col("violet") << centre_text(prompt[3], 58) << col("Lblue") << "|\n";
 
     // Left break

@@ -7,7 +7,6 @@
 string game_setup();
 void play_check();
 void game_loop();
-void debug_load_items();
 void take_item();
 void interact();
 
@@ -33,6 +32,7 @@ int main() {
     player.set_name("River");
     initialise_combination_recipes();
     initialise_locked_doors();
+    initialise_puzzle_solutions();
     load_main_question(question, option);
 
 	while (!game_over) {
@@ -77,6 +77,8 @@ void play_check() {
         current_room = find_room_by_coords(room_list, player.get_location());
         game_state = EXPLORE;
         initialise_combination_recipes();
+        initialise_locked_doors();
+        initialise_puzzle_solutions();
         load_main_question(question, option);
     }
 }
@@ -90,7 +92,6 @@ void game_loop() {
         break;
     }
     case EXPLORE: {
-        //prompt = {"","","","","","",""};
         bool redraw = true;
         bool waiting_for_input = true;
 
@@ -131,11 +132,9 @@ void game_loop() {
                 break;
             }
         }
-
         break;
     }
     case INVENTORY: {
-        inv_hint = { "","","","","" };
         bool in_inventory = true;
         bool redraw = true;
         question = "What would you like to do?";
@@ -185,16 +184,19 @@ void game_loop() {
                         }
                         break;
                     }
+                    inv_hint = { "","","","","" };
                 }
             }
             else {
                 switch (key) {
-                //case '1':
-                    // use_item();
-                    //redraw = true;  // optionally redraw if it changes state
+                case '1':
+                    use_item(player, selected_item_index, current_room, error_message, question, option, inv_hint, current_sort_mode,
+                                current_page, max_pages, game_state, prompt, in_inventory);
+                    redraw = true;
                     break;
                 case '2':
-                    combine_items(player, selected_item_index, inv_hint, question, option, current_sort_mode, max_pages, current_page);
+                    combine_items(player, selected_item_index, inv_hint, question, option,
+                                    current_sort_mode, max_pages, current_page);
                     redraw = true;
                     break;
                 case '3':
@@ -202,6 +204,8 @@ void game_loop() {
                     game_state = EXPLORE;
                     load_main_question(question, option);
                     error_message = "";
+                    prompt = { "","","","","","","" };
+                    inv_hint = { "","","","","" };
                     break;
                 case 's': case 'S':
                     current_sort_mode = (current_sort_mode == CHRONOLOGICAL) ? ALPHABETICAL : CHRONOLOGICAL;
@@ -217,22 +221,6 @@ void game_loop() {
         break;
     }
     }
-}
-
-void debug_load_items() {
-    player.add_to_inventory(coin);
-    player.add_to_inventory(leaf);
-    player.add_to_inventory(bell);
-    player.add_to_inventory(mirror_shard);
-    player.add_to_inventory(broken_fork);
-    player.add_to_inventory(lavender);
-    player.add_to_inventory(wax_finger);
-    player.add_to_inventory(notebook);
-    player.add_to_inventory(salt_packet);
-    player.add_to_inventory(spare_key);
-    player.add_to_inventory(lemon);
-    player.add_to_inventory(whistle);
-    player.add_to_inventory(tarot);
 }
 
 void take_item() {
@@ -279,11 +267,8 @@ void interact() {
     option = { "","","","","","" };
     error_message = "";
     prompt = { "", "", "What do you want to interact with?", "", "Type the curiosity name and press Enter","","" };
-
-    // Show the screen with the prompt
     show_explore_screen(player, current_room, question, error_message, option, prompt);
 
-    // Get user input
     getline(cin, interaction_target);
     interaction_target = to_lower(interaction_target);
     bool found = false;
@@ -298,33 +283,68 @@ void interact() {
                 if (!obj.has_been_used()) {
                     obj.mark_used();
 
-                    // Adjust direction as needed
                     current_room->unlock_exit(obj.get_unlock_direction());
 
-                    prompt = { obj.get_result_text()[0], obj.get_result_text()[1], obj.get_result_text()[2], obj.get_result_text()[3],
-                                obj.get_result_text()[4], obj.get_result_text()[5], obj.get_result_text()[6] };
-                    load_main_question(question, option);
-                    show_explore_screen(player, current_room, question, error_message, option, prompt);
+                    prompt = obj.get_result_text();
                 }
                 else {
-                    prompt = { obj.get_repeat_text()[0], obj.get_repeat_text()[1], obj.get_repeat_text()[2], obj.get_repeat_text()[3],
-                                obj.get_repeat_text()[4], obj.get_repeat_text()[5], obj.get_repeat_text()[6] };
-                    load_main_question(question, option);
+                    prompt = obj.get_repeat_text();
                 }
             }
             else if (type == "flavour") {
-                prompt = { obj.get_result_text()[0], obj.get_result_text()[1], obj.get_result_text()[2], obj.get_result_text()[3],
-                                obj.get_result_text()[4], obj.get_result_text()[5], obj.get_result_text()[6] };
-                load_main_question(question, option);
+                if (!obj.has_been_used()) {
+                    obj.mark_used();
+                    prompt = obj.get_result_text();
+                }
+                else {
+                    prompt = obj.get_repeat_text();
+                }
             }
+            else if (type == "reveal") {
+                if (!obj.has_been_used()) {
+                    obj.mark_used();
 
-            else {
-                prompt = { "", "", "", "", "", "", ""};
+                    Item revealed = obj.get_revealed_item();
+                    player.add_to_inventory(revealed);
+
+                    prompt = obj.get_result_text();
+                    error_message = "You received the " + revealed.get_name();
+                }
+                else {
+                    prompt = obj.get_repeat_text();
+                }
+            }
+            else if (type == "puzzle") {
+                if (!obj.has_been_used()) {
+                    prompt = obj.get_result_text();
+                }
+                else {
+                    prompt = obj.get_repeat_text();
+                }
+            }
+            else if (type == "conditional") {
+                if (obj.is_locked()) {
+                    prompt = obj.get_result_text();
+                }
+                else {
+                    if (!obj.has_been_used()) {
+                        obj.mark_used();
+                        Item revealed = obj.get_revealed_item();
+                        player.add_to_inventory(revealed);
+
+                        prompt = obj.get_puzzle_success_text();
+                        error_message = "You received the " + revealed.get_name();
+                    }
+                    else {
+                        prompt = obj.get_repeat_text();
+                    }
+                }
+            }
+            else { // FAILSAFE
                 error_message = "Nothing happens. Yet.";
-                load_main_question(question, option);
                 prompt = { "","","","","","","" };
             }
-            break;
+            load_main_question(question, option);
         }
     }
 

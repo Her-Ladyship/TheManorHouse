@@ -6,6 +6,91 @@
 #include <conio.h>
 #include <algorithm>
 
+void use_item(Player& player, int selected_item_index, Room* current_room, string& error_message, string& question,
+                vector<string>& option, vector<string>& inv_hint, SortMode current_sort_mode, int& current_page,
+                int&max_pages, GameState& game_state, vector<string>& prompt, bool& in_inv) {
+
+    if (player.get_inventory().empty()) {
+        inv_hint = { "", "", "Your inventory is empty", "", "" };
+        return;
+    }
+
+    Item selected_item = player.get_inventory()[selected_item_index];
+    string item_name = selected_item.get_name();
+
+    inv_hint = {"","","","",""};
+    question = "Use the " + item_name + " on what ? ";
+    option = {"","","","","",""};
+    vector<Object>& room_objects = current_room->get_objects();
+    int num_objects = room_objects.size();
+
+    for (int i = 0; i < num_objects && i < 3; ++i) {
+        option[i] = to_string(i + 1) + ". " + room_objects[i].get_name();
+    }
+
+    show_inventory_screen(player, selected_item_index, inv_hint, question, option, current_sort_mode, current_page, max_pages);
+
+    bool choosing = true;
+    bool redraw = true;
+
+    while (choosing) {
+        if (redraw) {
+            show_inventory_screen(player, selected_item_index, inv_hint, question, option, current_sort_mode, current_page, max_pages);
+            redraw = false;
+        }
+
+        char key = _getch();
+        int selected_index = key - '1';
+
+        if (selected_index >= 0 && selected_index < num_objects) {
+            Object& obj = room_objects[selected_index];
+
+            pair<string, string> puzzle_key = make_puzzle_key(item_name, obj.get_name());
+
+            if (puzzle_recipes.find(puzzle_key) != puzzle_recipes.end() &&
+                obj.get_interaction_type() == "puzzle" && !obj.has_been_used()) {
+                obj.mark_used();
+                player.add_to_inventory(obj.get_revealed_item());
+
+                // SPECIAL CASE: Whistle used on Mirror unlocks Bureau
+                if (item_name == "Whistle" && obj.get_name() == "Mirror") {
+                    for (Object& other : current_room->get_objects()) {
+                        if (other.get_name() == "Bureau") {
+                            other.set_locked(false);
+                            break;
+                        }
+                    }
+                }
+
+                if (!obj.get_unlock_direction().empty()) {
+                    current_room->unlock_exit(obj.get_unlock_direction());
+                }
+
+                game_state = EXPLORE;
+                error_message = "You used the " + item_name + " on the " + obj.get_name();
+                prompt = obj.get_puzzle_success_text();
+                load_main_question(question, option);
+                choosing = false;
+                in_inv = false;
+            }
+            else if (obj.get_interaction_type() == "puzzle" && obj.has_been_used()) {
+                game_state = EXPLORE;
+                inv_hint = { "", "", "You've done this already", "", ""};
+                load_inv_main_question(question, option);
+                redraw = true;
+                choosing = false;
+            }
+            else {
+                inv_hint = { "", "That doesn't seem", "to do anything", "", "" };
+                load_inv_main_question(question, option);
+                redraw = true;
+                choosing = false;
+            }
+        }
+    }
+}
+
+
 void combine_items(Player& player, int& selected_index, vector<string>& inv_hint, string& question,
                     vector<string>& option, SortMode& current_sort_mode, int max_pages, int& current_page) {
 

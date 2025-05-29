@@ -4,11 +4,6 @@
 #include <regex>
 #include <algorithm>
 
-void press_any_key() {
-    cout << "Press any key to continue...";
-    system("pause>nul");
-}
-
 bool yes_no_check(const string& prompt) {
     string input;
     char choice;
