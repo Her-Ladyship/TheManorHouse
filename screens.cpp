@@ -3,6 +3,78 @@
 
 const int ITEMS_PER_PAGE = 11;
 
+void show_title_screen() {
+
+    system("CLS");
+
+    // Border
+    cout << col("cyan") << " +" << col("Lblue") << string(117, '-') << col("cyan") << "+\n" << col("Lblue");
+    cout << " |" << string(117, ' ') << "|\n";
+
+    // 'The'
+    cout << " |" << string(5, ' ') << col("violet") << "...     ..      .." << string(60, ' ') << col("pink") << "~~~888~~~ 888"
+        << string(21, ' ') << col("Lblue") << "|\n";
+    cout << " |   " << col("violet") << "x*8888x.:*8888: -\"888:" << string(61, ' ') << col("pink") << "888    888-~88e  e88~~8e"
+        << string(7, ' ') << col("Lblue") << "|\n";
+    cout << " |  " << col("violet") << "X   48888X `8888H  8888" << string(61, ' ') << col("pink") << "888    888  888 d888  88b"
+        << string(6, ' ') << col("Lblue") << "|\n";
+    cout << " | " << col("violet") << "X8x.  8888X  8888X  !888>" << string(60, ' ') << col("pink") << "888    888  888 8888__888"
+        << string(6, ' ') << col("Lblue") << "|\n";
+    cout << " | " << col("violet") << "X8888 X8888  88888   \"*8%-       u        u.    u.          u.      .u    ."
+        << string(10, ' ') << col("pink") << "888    888  888 Y888    ," << col("Lblue") << "      |\n";
+    cout << " | " << col("violet") << "'*888!X8888> X8888  xH8>      us888u.   x@88k u@88c.  ...ue888b   .d88B :@8c"
+        << string(9, ' ') << col("pink") << "888    888  888  \"88___/ " << string(6, ' ') << col("Lblue") << "|\n";
+
+    // 'Manor' ======
+    cout << " |   " << col("violet") << "`?8 `8888  X888X X888>   .@88 \"8888\" ^\"8888\"\"8888\"  888R Y888r =\"8888f8888r"
+        << string(39, ' ') << col("Lblue") << "|\n";
+    cout << " |   " << col("violet") << "-^  '888\"  X888  8888>   9888  9888    8888  888R   888R I888>   4888>'88\""
+        << string(40, ' ') << col("Lblue") << "|\n";
+    cout << " |    " << col("violet") << "dx '88~x. !88~  8888>   9888  9888    8888  888R   888R I888>   4888> '"
+        << string(42, ' ') << col("Lblue") << "|\n";
+    cout << " |  " << col("violet") << ".8888Xf.888x:!    X888X.: 9888  9888    8888  888R   888R I888>   4888>"
+        << string(44, ' ') << col("Lblue") << "|\n";
+    cout << " | " << col("violet") << ":\"\"888\":~\"888\"     `888*\"  9888  9888    8888  888R  u8888cJ888   .d888L .+"
+        << string(41, ' ') << col("Lblue") << "|\n";
+    cout << " |     " << col("violet") << "\"~'    \"~        \"\"    \"888*\"\"888\"  \"*88*\" 8888\"  \"*888*P\"    ^\"8888*\""
+        << string(42, ' ') << col("Lblue") << "|\n";
+    cout << " |" << col("violet") << string(29, ' ') << "^Y\"   ^Y'      \"\"   'Y\"      'Y\"         \"Y\""
+        << string(44, ' ') << col("Lblue") << "|\n";
+    cout << " |  " << col("violet") << string(93, ' ') << ".x+=:." << string(16, ' ') << col("Lblue") << "|\n";
+    cout << " | " << col("violet") << string(51, ' ') << ".xHL" << string(38, ' ') << "z`    ^%"
+        << string(15, ' ') << col("Lblue") << "|\n";
+
+    // 'House'
+    cout << " |     " << col("violet") << string(44, ' ') << ". - `8888hxxx~         u.       x.    .         .   <k"
+        << string(14, ' ') << col("Lblue") << "|\n";
+    cout << " |" << string(46, ' ') << col("violet") << ".H8X  `%888*\"       ...ue888b   .@88k  z88u      .@8Ned8\"      .u"
+        << string(6, ' ') << col("Lblue") << "|\n";
+    cout << " |" << string(46, ' ') << col("violet") << "888X     ..x..      888R Y888r ~\"8888 ^8888    .@^%8888\"    ud8888."
+        << col("Lblue") << "    |\n";
+    cout << " |" << string(45, ' ') << col("violet") << "'8888k .x8888888x    888R I888>   8888  888R   x88:  `)8b. :888'8888."
+        << col("Lblue") << "   |\n";
+    cout << " |" << string(46, ' ') << col("violet") << "?8888X    \"88888X   888R I888>   8888  888R   8888N=*8888 d888 '88%\""
+        << col("Lblue") << "   |\n";
+    cout << " |" << string(47, ' ') << col("violet") << "?8888X    '88888>  888R I888>   8888  888R    %8\"    R88 8888.+\""
+        << col("Lblue") << "      |\n";
+    cout << " |" << string(44, ' ') << col("violet") << "H8H %8888     `8888> u8888cJ888    8888 ,888B .   @8Wou 9%  8888L"
+        << string(8, ' ') << col("Lblue") << "|\n";
+    cout << " |" << string(43, ' ') << col("violet") << "'888> 888\"      8888   \"*888*P\"    \"8888Y 8888\"  .888888P`   '8888c. .+"
+        << col("Lblue") << "   |\n";
+    cout << " |" << string(45, ' ') << col("violet") << "\"8` .8\" ..     88*      'Y\"        `Y\"   'YP    `   ^\"F      \"88888%"
+        << col("Lblue") << "    |\n";
+    cout << " |" << string(48, ' ') << col("violet") << "`  x8888h. d*\"                                              \"YP'"
+        << col("Lblue") << "     |\n";
+    cout << " |" << string(52, ' ') << col("violet") << "\"\"*888%~" << string(57, ' ') << col("Lblue") << "|\n";
+
+    // Border
+    cout << " |" << string(117, ' ') << "|\n";
+    cout << col("cyan") << " +" << col("Lblue") << string(117, '-') << col("cyan") << "+" << col("Lblue");
+
+
+    system("pause>nul");
+}
+
 void show_explore_screen(Player& player, Room*& current_room, string question, string error_message,
                             vector<string> option, vector<string>& prompt) {
 

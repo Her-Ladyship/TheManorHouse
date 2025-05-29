@@ -11,7 +11,7 @@ void take_item();
 void interact();
 
 // GLOBALS
-GameState game_state = EXPLORE;
+GameState game_state = TESTING;
 SortMode current_sort_mode = CHRONOLOGICAL;
 bool game_over = false;
 int selected_item_index = 0;
@@ -218,6 +218,10 @@ void game_loop() {
     }
     case COMBAT: {
         // combat stuff here
+        break;
+    }
+    case TESTING: {
+        show_title_screen();
         break;
     }
     }

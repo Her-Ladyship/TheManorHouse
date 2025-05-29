@@ -17,7 +17,8 @@ enum GameState {
     TITLE,
     EXPLORE,
     INVENTORY,
-    COMBAT
+    COMBAT,
+    TESTING
 };
 
 enum SortMode { CHRONOLOGICAL, ALPHABETICAL };
