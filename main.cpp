@@ -124,7 +124,7 @@ void game_loop() {
                 game_state = INVENTORY;
                 waiting_for_input = false;
                 break;
-            case '6':
+            case 'Q': case 'q':
                 game_over = true;
                 waiting_for_input = false;
                 break;
@@ -222,6 +222,7 @@ void game_loop() {
     }
     case TESTING: {
         show_title_screen();
+        system("pause>nul");
         break;
     }
     }

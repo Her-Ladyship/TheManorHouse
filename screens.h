@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "colours.h"
 #include "player.h"
 #include "helpers.h"
 #include "room.h"
@@ -12,6 +11,8 @@
 using namespace std;
 
 extern const int ITEMS_PER_PAGE;
+
+void draw_testing();
 
 void show_title_screen();
 void show_explore_screen(Player& player, Room*& current_room, string question, string error_message,

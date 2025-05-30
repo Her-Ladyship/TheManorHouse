@@ -69,7 +69,7 @@ void load_main_question(string& question, vector<string>& option) {
     option[2] = "3. Take Item";
     option[3] = "4. Check Inventory";
     option[4] = "";
-    option[5] = "6. Quit";
+    option[5] = "Q. Quit";
 }
 
 void load_inv_main_question(string& question, vector<string>& option) {
