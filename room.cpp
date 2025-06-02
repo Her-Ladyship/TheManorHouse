@@ -16,6 +16,9 @@ vector<Object>& Room::get_objects() { return objects; }
 void Room::set_item(Item i) { items.push_back(i); }
 void Room::set_object(Object o) { objects.push_back(o); }
 void Room::add_exit(string direction) { exits.push_back(direction); }
+void Room::set_description(string new_text, int text_num) {
+    description[text_num - 1] = new_text;
+}
 
 // ----- Locked Exits -----
 

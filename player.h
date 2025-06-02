@@ -29,5 +29,6 @@ public:
     void set_location(Coords c);
 
     void add_to_inventory(Item i);
+    void remove_from_inventory_by_name(const string& item_name);
     
 };

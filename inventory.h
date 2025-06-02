@@ -9,7 +9,7 @@
 
 using namespace std;
 
-void use_item(Player& player, int selected_item_index, Room* current_room, string& error_message, string& question,
+void use_item(Player& player, int& selected_item_index, Room* current_room, string& error_message, string& question,
 				vector<string>& option, vector<string>& inv_hint, SortMode current_sort_mode, int& current_page,
 				int& max_pages, GameState& game_state, vector<string>& prompt, bool& in_inv);
 

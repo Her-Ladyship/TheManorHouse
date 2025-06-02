@@ -6,7 +6,7 @@
 #include <conio.h>
 #include <algorithm>
 
-void use_item(Player& player, int selected_item_index, Room* current_room, string& error_message, string& question,
+void use_item(Player& player, int& selected_item_index, Room* current_room, string& error_message, string& question,
                 vector<string>& option, vector<string>& inv_hint, SortMode current_sort_mode, int& current_page,
                 int&max_pages, GameState& game_state, vector<string>& prompt, bool& in_inv) {
 
@@ -69,6 +69,7 @@ void use_item(Player& player, int selected_item_index, Room* current_room, strin
                 game_state = EXPLORE;
                 error_message = "You used the " + item_name + " on the " + obj.get_name();
                 prompt = obj.get_puzzle_success_text();
+                player.remove_from_inventory_by_name(selected_item.get_name());
                 load_main_question(question, option);
                 choosing = false;
                 in_inv = false;

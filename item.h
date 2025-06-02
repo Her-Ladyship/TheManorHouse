@@ -18,7 +18,7 @@ public:
     Item() : name(""), desc(""), lore({}) {}
     Item(string n, string d, vector<string> l) : name(n), desc(d), lore(l) {}
 
-    string get_name();
+    string get_name() const;
     string get_desc();
     vector<string> get_lore();
 };

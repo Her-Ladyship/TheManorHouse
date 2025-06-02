@@ -103,6 +103,7 @@ void game_loop() {
         bool redraw = true;
         question = "What would you like to do?";
         option = { "1. Use an item","2. Combine items","3. Return to exploration","","","" };
+        selected_item_index = 0;
 
         while (in_inventory) {
             if (redraw) {
@@ -220,6 +221,9 @@ void take_item() {
 
     if (it != room_items.end()) {
         player.add_to_inventory(*it);
+        if (it->get_name() == "Knife") {
+            room_list[3].set_description("", 5);
+        }
         error_message = "You took the " + it->get_name();
         room_items.erase(it);
     }

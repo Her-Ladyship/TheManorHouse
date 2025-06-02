@@ -36,6 +36,7 @@ public:
     void set_item(Item i);
     void set_object(Object o);
     void add_exit(string direction);
+    void set_description(string new_text, int text_num);
 
     bool is_exit_locked(const string& direction) const;
     void lock_exit(const string& direction);

@@ -174,7 +174,7 @@ string tint_house_char(char c) {
     case '@': case '+': case '=': return col("steel") + c;
     case 'o': case 'z': case 'w': return col("fog") + c;
     case 'x': case '<': return col("abyss") + c;
-    case 'a': return "\x1B[5m" + col("gold") + c + "\x1B[0m";
+    case 'a': return "\x1B[5m" + col("pink") + c + "\x1B[0m";
     case ' ': return " ";
     default: return col("violet") + c;
     }

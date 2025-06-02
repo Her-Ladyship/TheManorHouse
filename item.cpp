@@ -3,7 +3,7 @@
 
 // ----- Method Definitions -----
 
-string Item::get_name() { return name; }
+string Item::get_name() const { return name; }
 
 string Item::get_desc() { return desc; }
 
@@ -127,7 +127,7 @@ Item knife("Knife", "A kitchen knife with a thin, tapered blade.", // KITCHEN
     "Not dropped. Placed.",
     "",
     "The edge gleams under the light.",
-    "It doesn’t look like it’s ever touched food." });
+    "It doesn't look like it's ever touched food." });
 
 Item teacup("Teacup", "A fine porcelain teacup with hairline cracks.", // STARTING ITEM
     { "The pattern depicts a hunting scene that seems to",
