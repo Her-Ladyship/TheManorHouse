@@ -59,7 +59,7 @@ Item lavender("Lavender Sachet", "A faded cloth pouch tied with lavender ribbon.
     "It was meant to be a gift, once." }
 );
 
-Item wax_finger("Wax Finger", "A pale wax replica of a human finger, slightly melted.",
+Item wax_finger("Wax Finger", "A pale wax replica of a human finger, slightly melted.", // STARTING ITEM
     { "It is warm to the touch, even in cold rooms.",
     "The nail is painted black, chipped at the edge.",
     "Holding it gives the vague sensation of",
@@ -67,7 +67,7 @@ Item wax_finger("Wax Finger", "A pale wax replica of a human finger, slightly me
     "It smells faintly of smoke and cloves." }
 );
 
-Item notebook("Notebook", "A water-damaged notebook with soft blue covers.",
+Item notebook("Notebook", "A water-damaged notebook with soft blue covers.", // STARTING ITEM
     { "The pages are warped, the ink half-faded.",
     "Only the last few entries are readable.",
     "They describe dreams you've had - or will have.",
@@ -107,7 +107,7 @@ Item whistle("Whistle", "A polished metal whistle on a frayed cord.", // KITCHEN
     "It tastes faintly of copper." }
 );
 
-Item tarot("Tarot Card", "A card from a traditional tarot deck.",
+Item tarot("Tarot Card", "A card from a traditional tarot deck.", // STARTING ITEM
     { "Illustrated with a tower struck by lightning,",
     "people falling, arms flailing in panic.",
     "The ink is faded around the edges, like it's been drawn",
@@ -129,6 +129,33 @@ Item knife("Knife", "A kitchen knife with a thin, tapered blade.", // KITCHEN
     "The edge gleams under the light.",
     "It doesn’t look like it’s ever touched food." });
 
+Item teacup("Teacup", "A fine porcelain teacup with hairline cracks.", // STARTING ITEM
+    { "The pattern depicts a hunting scene that seems to",
+    "change every time you look away. There's a drop",
+    "of something red dried near the rim.",
+    "It smells faintly of bergamot and rust.",
+    "It's never empty for long." });
+
+Item milk_tooth("Milk Tooth", "A tooth wrapped in ribbon.", // STARTING ITEM
+    { "Too large for a child. Too small for an adult.",
+    "It was left beneath a pillow long ago.",
+    "Sometimes it clicks against itself",
+    "when no one's speaking.",
+    "A dead message from another place." });
+
+Item ticket("Ticket Stub", "A faded paper stub for an unknown event.", // STARTING ITEM
+    { "No date. No location. Just a seat number:",
+    "\"18G\". The ink glows faintly under candlelight.",
+    "When you hold it and close your eyes",
+    "you smell popcorn,",
+    "and hear the low rumble of appluase." });
+
+Item photo("Photograph", "A black & white photo of a house that doesn't exist.", // STARTING ITEM
+    { "Blurry at the edges. Burnt at one corner.",
+    "The windows are all lit,",
+    "but there's no life inside.",
+    "There's something watching from the attic.",
+    "On the back, your name is written in ash."});
 
 // Combining stuff
 map<pair<string, string>, Item> combination_recipes;

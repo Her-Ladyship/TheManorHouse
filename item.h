@@ -39,6 +39,10 @@ extern Item whistle;
 extern Item tarot;
 extern Item broom;
 extern Item knife;
+extern Item teacup;
+extern Item milk_tooth;
+extern Item ticket;
+extern Item photo;
 
 // Combining stuff
 extern map<pair<string, string>, Item> combination_recipes;

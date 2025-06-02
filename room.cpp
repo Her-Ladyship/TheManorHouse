@@ -104,7 +104,7 @@ Room hallway("Hallway",
     "A threadbare rug trails down the centre, marked with paths worn by long-forgotten feet.",
     "A small bureau stands off to the side, with a grimy mirror hanging above.",
     "Behind you, the porch creaks once. Then nothing."},
-    { 0, 1 }, { "South", "East", "West", "North"},
+    { 0, 1 }, { "North", "South", "East", "West"},
     { bell, lavender },
     { bureau, mirror, keyhole }
 );

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
 using namespace std;
 
 struct Colour {
@@ -25,6 +26,8 @@ void inverse_text(const string& colour_name);
 void strikethrough_text(const string& colour_name);
 
 string health_colour(int num);
+string apply_tinted_gradient(const string& line, int row_index);
+string tint_house_char(char c);
 
 // Declare colour list
 extern vector<Colour> colours;

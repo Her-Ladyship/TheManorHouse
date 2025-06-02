@@ -23,3 +23,5 @@ extern vector < string> letterE;
 
 extern vector<string> wordHOUSE;
 
+extern vector<string> tag_box;
+

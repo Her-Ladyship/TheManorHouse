@@ -3,45 +3,31 @@
 #include "colours.h"
 #include "lettering.h"
 
+#include <limits>
+
 const int ITEMS_PER_PAGE = 11;
 
 void show_title_screen() {
 
     system("CLS");
 
-    // Header border
-    cout << col("cyan") << " +" << col("Lblue") << string(117, '-') << col("cyan") << "+\n";
-
-    // Top padding (1 row)
+    cout << col("violet") << " +" << col("Lblue") << string(117, '-') << col("violet") << "+\n";
     cout << col("Lblue") << " |" << string(117, ' ') << "|\n";
 
     // THE + MANOR block (12 rows)
     for (int i = 0; i < 12; i++) {
         string line = " |";
 
-        // THE part (only 6 rows tall)
         if (i < 6) {
-            line += col("Lred") + "   " + wordTHE[i];
-        }
-        else if (i == 9) {
-            line += col("white") + string(12, ' ') + "MADE BY" + string(12, ' ');
-        }
-        else if (i == 11) {
-            line += col("white") + string(7, ' ') + "HER LADYSHIP GAMES" + string(6, ' ');
+            line += col("seafoam") + "\x1B[2m" + "   " + wordTHE[i];
         }
         else {
             line += string(31, ' ');
         }
 
-        // Space between THE and MANOR (7 spaces)
-        line += string(6, ' ');
-
-        // MANOR part (always print)
-        line += col("pink") + wordMANOR[i];
-
-        // Fill the rest of the line with spaces
-        int remaining = 115 - (28 + 7 + wordMANOR[i].length());
-        line += col("Lblue") + string(remaining, ' ') + "|\n";
+        line += string(6, ' ') + "\x1B[0m";
+        line += apply_tinted_gradient(wordMANOR[i], i);
+        line += col("Lblue") + "   |\n";
 
         cout << line;
     }
@@ -51,24 +37,261 @@ void show_title_screen() {
 
     // HOUSE block (12 rows)
     for (int i = 0; i < 12; i++) {
-        string line = " |";
 
-        // HOUSE is approx 69 chars wide -> centre it
-        int left_padding = (117 - wordHOUSE[i].length()) / 2;
-        line += string(left_padding, ' ');
-        line += col("violet") + wordHOUSE[i];
-        line += col("Lblue") + string(117 - left_padding - wordHOUSE[i].length(), ' ') + "|\n";
+        string line = " |";
+        if (i < 7) {
+                line += string(39, ' ');
+            }
+        else {
+            line += string(6, ' ');
+            line += tag_box[i - 7];
+            line += string(11, ' ');
+        }
+
+        for (char c : wordHOUSE[i]) {
+            line += tint_house_char(c);
+        }
+
+        line += col("Lblue") + string(7, ' ') + "|\n";
 
         cout << line;
     }
 
-    // Bottom padding
     cout << " |" << string(117, ' ') << "|\n";
     cout << " |" << string(117, ' ') << "|\n";
 
-    // Footer border
-    cout << col("cyan") << " +" << col("Lblue") << string(117, '-') << col("cyan") << "+";
+    cout << col("violet") << " +" << col("Lblue") << string(117, '-') << col("violet") << "+";
 }
+
+void show_name_entry_screen(Player& player) {
+
+    system("CLS");
+
+    auto draw_border = [](string col1, string col2, int width) {
+        return col(col1) + " +" + col(col2) + string(width, '-') + col(col1) + "+";
+        };
+
+    auto draw_blank_line = [](int width) {
+        return col("Lblue") + " |" + string(width, ' ') + "|\n";
+        };
+
+    const int total_width = 117;
+    const int box_width = 111;
+
+    // Top outer border
+    cout << draw_border("violet", "Lblue", total_width) << "\n";
+
+    // Top banner box
+    for (int i = 0; i < 10; i++) {
+        if (i == 1 || i == 8) {
+            cout << " |  " << col("violet") << "+" << col("gold") << string(box_width, '-') << col("violet") << "+" << col("Lblue") << "  |\n";
+        }
+        else if (i == 4) {
+            string banner = "What is your name, wanderer?";
+            int padding = (box_width - banner.length()) / 2;
+            cout << " |  " << col("gold") << "|" << string(padding, ' ')
+                << col("pink") << banner << string(box_width - banner.length() - padding, ' ')
+                << col("gold") << "|" << col("Lblue") << "  |\n";
+        }
+        else if (i > 1 && i < 8) {
+            cout << " |  " << col("gold") << "|" << string(box_width, ' ') << "|" << col("Lblue") << "  |\n";
+        }
+        else {
+            cout << draw_blank_line(total_width);
+        }
+    }
+
+    // Panel box border (top)
+    cout << col("violet") << " +"
+        << col("Lblue") << string(30, '-') << col("violet") << "+  +"
+        << col("gold") << string(49, '-') << col("violet") << "+  +"
+        << col("Lblue") << string(30, '-') << col("violet") << "+\n" << col("Lblue");
+
+    // Middle section
+    for (int i = 0; i < 17; i++) {
+        if (i == 5 || i == 9) {
+            cout << " |" << string(30, ' ') << "|  "
+                << col("gold") << "|  " << col("violet") << "+" << col("white") << string(43, '-') << col("violet") << "+  "
+                << col("gold") << "|" << col("Lblue") << "  |" << string(30, ' ') << "|\n";
+        }
+        else if (i == 6 || i == 7 || i == 8) {
+            cout << " |" << string(30, ' ') << "|  "
+                << col("gold") << "|  " << col("white") << "|" << string(43, ' ') << "|" << col("gold") << "  |"
+                << col("Lblue") << "  |" << string(30, ' ') << "|\n";
+        }
+        else if (i == 15) {
+            cout << " |" << string(30, ' ') << "|" << col("violet") << "  +"
+                << col("gold") << string(49, '-') << col("violet") << "+" << col("Lblue") << "  |"
+                << string(30, ' ') << "|\n" << col("Lblue");
+        }
+        else if (i == 16) {
+            cout << " |" << string(30, ' ') << "|" << string(55, ' ') << "|" << string(30, ' ') << "|\n";
+        }
+        else {
+            // Default layout
+            cout << " |" << string(30, ' ') << "|  ";
+            cout << col("gold") << "|" << string(49, ' ') << "|  ";
+            cout << col("Lblue") << "|" << string(30, ' ') << "|\n";
+        }
+    }
+
+    // Bottom outer border
+    cout << col("violet") << " +"
+        << col("Lblue") << string(30, '-')
+        << col("violet") << "+" << col("Lblue") << string(55, '-')
+        << col("violet") << "+" << col("Lblue") << string(30, '-')
+        << col("violet") << "+";
+
+    string player_name;
+    bool name_correct = false;
+
+    while (!name_correct) {
+        // Clear screen or redraw the name section if needed
+        add_text(20, 44, string(35, ' '), "white");
+
+        move_cursor(20, 44);
+        player_name = get_limited_input(35);
+
+        // Trim leading/trailing whitespace
+        player_name.erase(0, player_name.find_first_not_of(" \t\n\r\f\v"));
+        player_name.erase(player_name.find_last_not_of(" \t\n\r\f\v") + 1);
+
+        // Check for empty
+        if (player_name.empty()) {
+            add_text(25, 44, string(37, ' '), "white");
+            add_text(25, 51, "You must enter a name", "Lred");
+            continue;
+        }
+
+        // Length check
+        if (player_name.length() > 18) {
+            add_text(25, 44, "That name is FAR too long. Try again", "Lred");
+            continue;
+        }
+
+        while (true) {
+            add_text(25, 44, string(37, ' '), "white");
+            move_cursor(24, 51);
+            cout << col("pink") << "Is this correct? (Y/N)";
+            move_cursor(30, 123);
+
+            char confirm = tolower(_getch());
+
+            if (confirm == 'y') {
+                name_correct = true;
+                break; // Name accepted!
+            }
+            else if (confirm == 'n') {
+                add_text(20, 44, string(35, ' '), "white"); // Clear name box
+                add_text(25, 44, string(37, ' '), "white"); // Clear confirmation line
+                break; // We'll loop back to re-enter
+            }
+            else {
+                add_text(26, 52, "Please press Y or N", "Lred");
+            }
+        }
+
+        add_text(24, 51, string(25, ' '), "Lred");
+        add_text(26, 51, string(25, ' '), "Lred");
+    }
+
+    add_text(20, 44, string(35, ' '), "white");
+    add_text(25, 44, string(37, ' '), "white");
+    player_name = capitalise_words(player_name);
+    player.set_name(player_name);
+
+    add_text(14, 93, "PLAYER NAME:", "pink");
+    add_text(15, 93, player_name, "violet");
+
+    add_text(6, 44, "What kind of adventurer will you be?", "pink");
+    add_text(15, 10, "1. Curious", "seafoam");
+    add_text(17, 10, "2. Brave", "rose");
+    add_text(19, 10, "3. Timid", "lavender");
+    add_text(21, 10, "4. Unbothered", "abyss");
+    add_text(23, 10, "5. Fiery", "brass");
+    add_text(25, 10, "6. Precise", "crimson");
+    add_text(27, 10, "7. Thoughtful", "cyan");
+
+    move_cursor(30, 121);
+
+    char key = '0';
+    string style;
+    Item start_item;
+    while (key == '0') {
+        key = _getch();
+        switch (key) {
+        case '1': {
+            style = "Curious";
+            start_item = teacup;
+            break;
+        }
+        case '2': {
+            style = "Brave";
+            start_item = milk_tooth;
+            break;
+        }
+        case '3': {
+            style = "Timid";
+            start_item = photo;
+            break;
+        }
+        case '4': {
+            style = "Unbothered";
+            start_item = wax_finger;
+            break;
+        }
+        case '5': {
+            style = "Fiery";
+            start_item = ticket;
+            break;
+        }
+        case '6': {
+            style = "Precise";
+            start_item = notebook;
+            break;
+        }
+        case '7': {
+            style = "Thoughtful";
+            start_item = tarot;
+            break;
+        }
+        default: {
+            key = '0';
+            add_text(25, 50, "Just pick a bloody number", "Lred");
+            move_cursor(30, 121);
+        }
+        }
+    }
+    add_text(25, 50, string(25, ' '), "white");
+
+    add_text(18, 93, "ADVENTURE STYLE:", "pink");
+    add_text(19, 93, style, "violet");
+    add_text(22, 93, "STARTING ITEM:", "pink");
+    add_text(23, 93, start_item.get_name(), "violet");
+    player.add_to_inventory(start_item);
+
+    add_text(6, 44, string(50, ' '), "white");
+
+    for (int i = 0; i < 7; i++) {
+        add_text(15 + (2 * i), 10, string(15, ' '), "white");
+    }
+
+    add_text(6, 48, "What is your biggest fear?", "pink");
+    string input;
+    move_cursor(20, 44);
+    input = get_limited_input(35);
+    add_text(6, 44, string(50, ' '), "white");
+    add_text(20, 44, string(35, ' '), "white");
+
+    add_text(26, 93, "PERSONALITY PROFILE:", "pink");
+    add_text(27, 93, get_random_profile(), "violet");
+
+    add_text(25, 45, "Press any key to start the game...", "Lred");
+
+    move_cursor(30, 121);
+
+}
+
 
 void show_explore_screen(Player& player, Room*& current_room, string question, string error_message,
                             vector<string> option, vector<string>& prompt) {
@@ -78,9 +301,9 @@ void show_explore_screen(Player& player, Room*& current_room, string question, s
     system("CLS");
 
     // Break
-    cout << col("cyan") << " +" << col("Lblue") << string(37, '-') << col("cyan")
-        << "+" << col("Lblue") << string(41, '-') << col("cyan")
-        << "+" << col("Lblue") << string(37, '-') << col("cyan") << "+\n";
+    cout << col("violet") << " +" << col("Lblue") << string(37, '-') << col("violet")
+        << "+" << col("Lblue") << string(41, '-') << col("violet")
+        << "+" << col("Lblue") << string(37, '-') << col("violet") << "+\n";
 
     // Title
     cout << col("Lblue") << " |      " << col("pink") << "Name: " << col("violet")
@@ -91,9 +314,9 @@ void show_explore_screen(Player& player, Room*& current_room, string question, s
         << col("Lblue") << "|\n";
 
     // Break
-    cout << col("cyan") << " +" << col("Lblue") << string(37, '-') << col("cyan")
-        << "+" << col("Lblue") << string(41, '-') << col("cyan")
-        << "+" << col("Lblue") << string(37, '-') << col("cyan") << "+\n";
+    cout << col("violet") << " +" << col("Lblue") << string(37, '-') << col("violet")
+        << "+" << col("Lblue") << string(41, '-') << col("violet")
+        << "+" << col("Lblue") << string(37, '-') << col("violet") << "+\n";
 
     // Area Description
     cout << col("Lblue") << " |" << string(117, ' ') << "|\n";
@@ -110,8 +333,8 @@ void show_explore_screen(Player& player, Room*& current_room, string question, s
     cout << " |" << string(117, ' ') << "|\n";
 
     // Break
-    cout << col("cyan") << " +" << col("Lblue") << string(58, '-') << col("cyan") << "+"
-        << col("Lblue") << string(58, '-') << col("cyan") << "+\n";
+    cout << col("violet") << " +" << col("Lblue") << string(58, '-') << col("violet") << "+"
+        << col("Lblue") << string(58, '-') << col("violet") << "+\n";
 
     // Boxes
     cout << col("Lblue") << " |" << string(58, ' ') << "|" << string(58, ' ') << "|\n";
@@ -124,7 +347,7 @@ void show_explore_screen(Player& player, Room*& current_room, string question, s
     cout << " |" << string(58, ' ') << "|" << col("violet") << centre_text(prompt[3], 58) << col("Lblue") << "|\n";
 
     // Left break
-    cout << col("cyan") << " +" << col("Lblue") << string(58, '-') << col("cyan") << "+"
+    cout << col("violet") << " +" << col("Lblue") << string(58, '-') << col("violet") << "+"
         << col("violet") << centre_text(prompt[4], 58) << col("Lblue") << "|\n";
 
     // More boxes
@@ -133,8 +356,8 @@ void show_explore_screen(Player& player, Room*& current_room, string question, s
     cout << " |   " << col("white") << setw(55) << left << option[0] << col("Lblue") << "|" << string(58, ' ') << "|\n";
 
     // Right break
-    cout << " |   " << col("white") << setw(55) << left << option[1] << col("cyan")
-        << "+" << col("Lblue") << string(58, '-') << col("cyan") << "+\n" << col("Lblue");
+    cout << " |   " << col("white") << setw(55) << left << option[1] << col("violet")
+        << "+" << col("Lblue") << string(58, '-') << col("violet") << "+\n" << col("Lblue");
     cout << " |   " << col("white") << setw(55) << left << option[2]
         << col("Lblue") << "|" << string(58, ' ') << "|\n";
     cout << " |   " << col("white") << setw(55) << left << option[3]
@@ -146,8 +369,8 @@ void show_explore_screen(Player& player, Room*& current_room, string question, s
     cout << " |" << string(58, ' ') << "|" << string(58, ' ') << "|\n";
 
     // Base line
-    cout << col("cyan") << " +" << col("Lblue") << string(58, '-') << col("cyan") << "+"
-        << col("Lblue") << string(58, '-') << col("cyan") << "+\n\n";
+    cout << col("violet") << " +" << col("Lblue") << string(58, '-') << col("violet") << "+"
+        << col("Lblue") << string(58, '-') << col("violet") << "+\n\n";
 
     // Cursor input
     cout << col("white") << " > ";
@@ -159,8 +382,8 @@ void show_inventory_screen(Player& player, int& selected_item_index, vector<stri
     system("CLS");
 
     // Header border
-    cout << col("cyan") << " +" << col("Lblue");
-    cout << string(117, '-') << col("cyan") << "+\n";
+    cout << col("violet") << " +" << col("Lblue");
+    cout << string(117, '-') << col("violet") << "+\n";
 
     string sort_type = "S: Sort (";
     if (current_sort_mode == CHRONOLOGICAL) { sort_type += "CHRONOLOGICAL"; }
@@ -176,16 +399,16 @@ void show_inventory_screen(Player& player, int& selected_item_index, vector<stri
         << "INVENTORY" << col("violet") << setw(49) << right << sort_type << col("Lblue") << "     |\n";
 
     // Divider
-    cout << col("cyan") << " +" << col("Lblue") << string(30, '-') << col("cyan") << "+"
-        << col("Lblue") << string(86, '-') << col("cyan") << "+\n";
+    cout << col("violet") << " +" << col("Lblue") << string(30, '-') << col("violet") << "+"
+        << col("Lblue") << string(86, '-') << col("violet") << "+\n";
 
     // Column headers
     cout << col("Lblue") << " |     " << col("pink") << setw(25) << left << "Item" << col("Lblue")
         << "|  " << col("pink") << setw(84) << left << "Description" << col("Lblue") << "|\n";
 
     // Divider
-    cout << col("cyan") << " +" << col("Lblue") << string(30, '-') << col("cyan") << "+"
-        << col("Lblue") << string(86, '-') << col("cyan") << "+\n";
+    cout << col("violet") << " +" << col("Lblue") << string(30, '-') << col("violet") << "+"
+        << col("Lblue") << string(86, '-') << col("violet") << "+\n";
 
     // Inventory listing
     vector<Item> displayed_inventory = player.get_inventory();
@@ -225,9 +448,9 @@ void show_inventory_screen(Player& player, int& selected_item_index, vector<stri
     }
 
     // Divider
-    cout << col("cyan") << " +" << col("Lblue");
-    cout << string(30, '-') << col("cyan") << "+" << col("Lblue") << string(56, '-')
-        << col("cyan") << "+" << col("Lblue") << string(29, '-') << col("cyan") << "+\n";
+    cout << col("violet") << " +" << col("Lblue");
+    cout << string(30, '-') << col("violet") << "+" << col("Lblue") << string(56, '-')
+        << col("violet") << "+" << col("Lblue") << string(29, '-') << col("violet") << "+\n";
 
     cout << col("Lblue") << " |" << string(30, ' ') << "|" << string(56, ' ') << "|" << string(29, ' ') << "|\n";
 
@@ -261,8 +484,8 @@ void show_inventory_screen(Player& player, int& selected_item_index, vector<stri
     cout << " |" << string(30, ' ') << "|" << string(56, ' ') << "|" << string(29, ' ') << "|\n";
 
     // Final bottom border
-    cout << col("cyan") << " +" << col("Lblue") << string(30, '-') << col("cyan") << "+" << col("Lblue") << string(56, '-')
-        << col("cyan") << "+" << col("Lblue") << string(29, '-') << col("cyan") << "+\n\n";
+    cout << col("violet") << " +" << col("Lblue") << string(30, '-') << col("violet") << "+" << col("Lblue") << string(56, '-')
+        << col("violet") << "+" << col("Lblue") << string(29, '-') << col("violet") << "+\n\n";
 
     // Input prompt
     cout << col("white") << " > ";

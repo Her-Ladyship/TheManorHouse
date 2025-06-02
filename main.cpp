@@ -4,14 +4,12 @@
 #include "inventory.h"
 
 // PROTOTYPES
-string game_setup();
-void play_check();
 void game_loop();
 void take_item();
 void interact();
 
 // GLOBALS
-GameState game_state = TESTING;
+GameState game_state = TITLE;
 SortMode current_sort_mode = CHRONOLOGICAL;
 bool game_over = false;
 int selected_item_index = 0;
@@ -28,13 +26,6 @@ Room* current_room;
 // MAIN
 int main() {
 
-    // DEBUG
-    player.set_name("River");
-    initialise_combination_recipes();
-    initialise_locked_doors();
-    initialise_puzzle_solutions();
-    load_main_question(question, option);
-
 	while (!game_over) {
         game_loop();
 	}
@@ -43,52 +34,25 @@ int main() {
 }
 
 // FUNCTIONS
-string game_setup() {
-    cout << "Hi. Welcome to the game.\n\n";
-    cout << "What is your name? ";
-    string player_name;
-    getline(cin, player_name);
-
-    if (player_name.length() > 18) {
-        cout << "\nWoah there, superstar. Let's keep it under 18 characters.\n";
-        player_name = player_name.substr(0, 18);
-    }
-
-    while (!yes_no_check("\nYou have entered " + player_name + " - is this correct? (Y/N) ")) {
-        cout << "Ugh. Gross. Try again, I suppose.\n\n";
-        cout << "What is your name? ";
-        getline(cin, player_name);
-        if (player_name.length() > 18) {
-            cout << "\nI ALREADY TOLD YOU. 18 CHARACTERS OR LESS!\n";
-            player_name = player_name.substr(0, 18);
-        }
-    }
-
-    return player_name;
-}
-
-void play_check() {
-    cout << "Well... Hello there " << player.get_name() << "...\n\n";
-    if (!yes_no_check("Are you ready to enter THE MANOR HOUSE? (Y/N) ")) {
-        cout << "Oh. Unexpected.\nI suppose you'll be leaving then...\n\n";
-        game_over = true;
-    }
-    else {
-        current_room = find_room_by_coords(room_list, player.get_location());
-        game_state = EXPLORE;
-        initialise_combination_recipes();
-        initialise_locked_doors();
-        initialise_puzzle_solutions();
-        load_main_question(question, option);
-    }
-}
 
 void game_loop() {
 
     switch (game_state) {
     case TITLE: {
-        player.set_name(game_setup());
-        play_check();
+        show_title_screen();
+        system("pause>nul");
+        game_state = NAME_ENTRY;
+        system("CLS");
+        break;
+    }
+    case NAME_ENTRY: {
+        show_name_entry_screen(player);
+        system("pause>nul");
+        initialise_combination_recipes();
+        initialise_locked_doors();
+        initialise_puzzle_solutions();
+        load_main_question(question, option);
+        game_state = EXPLORE;
         break;
     }
     case EXPLORE: {
@@ -221,8 +185,8 @@ void game_loop() {
         break;
     }
     case TESTING: {
-        show_title_screen();
-        system("pause>nul");
+        /*show_name_entry_screen(player);
+        system("pause>nul");*/
         break;
     }
     }

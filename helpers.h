@@ -15,6 +15,7 @@ struct Coords {
 
 enum GameState {
     TITLE,
+    NAME_ENTRY,
     EXPLORE,
     INVENTORY,
     COMBAT,
@@ -33,3 +34,7 @@ string to_lower(const string& input);
 string capitalise_words(const string& input);
 string strip_ansi_codes(const string& input);
 string pad_visual(const string& styled, int width);
+void move_cursor(int row, int col);
+string get_limited_input(int max_len);
+void add_text(int row, int column, const string& message, string colour);
+string get_random_profile();

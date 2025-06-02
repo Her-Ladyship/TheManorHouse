@@ -1,8 +1,11 @@
 
 #include "helpers.h"
+#include "colours.h"
 
 #include <regex>
 #include <algorithm>
+#include <conio.h>
+#include <random>
 
 bool yes_no_check(const string& prompt) {
     string input;
@@ -110,4 +113,46 @@ string strip_ansi_codes(const string& input) {
 string pad_visual(const string& styled, int width) {
     int len = strip_ansi_codes(styled).length();
     return styled + string(max(0, width - len), ' ');
+}
+
+void move_cursor(int row, int col) {
+    cout << "\x1B[" << row << ";" << col << "H";
+}
+
+string get_limited_input(int max_len) {
+    string result;
+    char ch;
+    while (true) {
+        ch = _getch();
+
+        if (ch == '\r') break; // Enter key
+        if (ch == '\b' && !result.empty()) {
+            result.pop_back();
+            cout << "\b \b"; // Erase last char visually
+        }
+        else if ((isalpha(ch) || ch == ' ' || ch == '-' || ch == '\'') && result.length() < max_len) {
+            result += ch;
+            cout << col("violet") << ch; // Echo with style
+        }
+    }
+    return result;
+}
+
+void add_text(int row, int column, const string& message, string colour) {
+    move_cursor(row, column);
+    cout << col(colour) << message;
+}
+
+string get_random_profile() {
+    static vector<string> profiles = {
+        "Overthinker", "Late Bloomer", "Mild Disappointment", "Unwitting Pawn",
+        "Habitual Escapist", "Unremarkable Soul", "Chronic Observer",
+        "Second Choice", "Misplaced Hope", "Burdened Romantic"
+    };
+
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dist(0, profiles.size() - 1);
+
+    return profiles[dist(gen)];
 }
