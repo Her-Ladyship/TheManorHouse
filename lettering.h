@@ -5,23 +5,21 @@
 #include <string>
 #include <iostream>
 
-using namespace std;
+// Declare all the ASCII-art letter/word vectors
+extern std::vector<std::string> letterM;
+extern std::vector<std::string> letterA;
+extern std::vector<std::string> letterN;
+extern std::vector<std::string> letterO;
+extern std::vector<std::string> letterR;
 
-extern vector<string> letterM;
-extern vector<string> letterA;
-extern vector<string> letterN;
-extern vector<string> letterO;
-extern vector<string> letterR;
+extern std::vector<std::string> wordMANOR;
+extern std::vector<std::string> wordTHE;
 
-extern vector<string> wordMANOR;
-extern vector<string> wordTHE;
+extern std::vector<std::string> letterH;
+extern std::vector<std::string> letterU;
+extern std::vector<std::string> letterS;
+extern std::vector<std::string> letterE;
 
-extern vector < string> letterH;
-extern vector < string> letterU;
-extern vector < string> letterS;
-extern vector < string> letterE;
+extern std::vector<std::string> wordHOUSE;
 
-extern vector<string> wordHOUSE;
-
-extern vector<string> tag_box;
-
+extern std::vector<std::string> tag_box;

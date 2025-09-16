@@ -5,37 +5,46 @@
 #include <vector>
 #include "item.h"
 
-using namespace std;
-
 class Object {
 private:
-    string name;
-    string interaction_type;        // "flavour", "reveal", "unlock", etc.
-    vector<string> result_text;     // First-time interaction result
-    vector<string> repeat_text;     // Text shown on repeated interaction
-    string unlock_direction;
-    bool used;
+    std::string name;
+    std::string interaction_type;        // "flavour", "reveal", "unlock", etc.
+    std::vector<std::string> result_text;     // First-time interaction result
+    std::vector<std::string> repeat_text;     // Text shown on repeated interaction
+    std::string unlock_direction;
+    std::vector<std::string> puzzle_success_text;
     Item revealed_item;
-    vector<string> puzzle_success_text;
+    bool used;
     bool locked;
 
 public:
-    Object(string n, string type = "flavour", vector<string> result = {}, vector<string> repeat = {},
-            string dir = "", vector<string> puzz = {}, Item item = Item(), bool u = false, bool l = false)
-        : name(n), interaction_type(type), result_text(result), repeat_text(repeat),
-            unlock_direction(dir), puzzle_success_text(puzz), revealed_item(item), used(u), locked(l) {}
+    Object(std::string n, std::string type = "flavour",
+        std::vector<std::string> result = {}, std::vector<std::string> repeat = {},
+        std::string dir = "", std::vector<std::string> puzz = {},
+        Item item = Item(), bool u = false, bool l = false)
+        : name(n),
+        interaction_type(type),
+        result_text(result),
+        repeat_text(repeat),
+        unlock_direction(dir),
+        puzzle_success_text(puzz),
+        revealed_item(item),
+        used(u),
+        locked(l) {
+    }
 
-    string get_name();
-    string get_interaction_type();
-    vector<string> get_result_text();
-    vector<string> get_repeat_text();
-    bool has_been_used();
+    std::string get_name() const;
+    std::string get_interaction_type() const;
+    const std::vector<std::string>& get_result_text() const;
+    const std::vector<std::string>& get_repeat_text() const;
+    bool has_been_used() const;
     void mark_used();
-    Item get_revealed_item();
+    void mark_unused();
+    Item get_revealed_item() const;
     void add_revealed_item(Item i);
-    string get_unlock_direction();
-    vector<string> get_puzzle_success_text();
-    bool is_locked();
+    std::string get_unlock_direction() const;
+    const std::vector<std::string>& get_puzzle_success_text() const;
+    bool is_locked() const;
     void set_locked(bool val);
 };
 
@@ -48,3 +57,6 @@ extern Object ceiling_fan;
 extern Object mirror;
 extern Object keyhole;
 extern Object kitchen_setting;
+extern Object sofa;
+extern Object mantle_clock;
+extern Object fireplace;

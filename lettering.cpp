@@ -1,7 +1,7 @@
 
 #include "lettering.h"
 
-vector<string> letterM = {
+std::vector<std::string> letterM = {
     "    ...     ..      ..    ",
     "  x*8888x.:*8888: -\"888:  ",
     " X   48888X `8888H  8888  ",
@@ -15,7 +15,7 @@ vector<string> letterM = {
     ":\"\"888\":~\"888\"     `888*\" ",
     "    \"~'    \"~        \"\"   " };
 
-vector<string> letterA = {
+std::vector<std::string> letterA = {
     "      u    ",
     "   us888u. ",
     ".@88 \"8888\"",
@@ -26,7 +26,7 @@ vector<string> letterA = {
     "\"888*\"\"888\"",
     " ^Y\"   ^Y' " };
 
-vector<string> letterN = {
+std::vector<std::string> letterN = {
     "   u.    u.  ",
     " x@88k u@88c.",
     "^\"8888\"\"8888\"",
@@ -37,7 +37,7 @@ vector<string> letterN = {
     " \"*88*\" 8888\"",
     "   \"\"   'Y\"  " };
 
-vector<string> letterO = {
+std::vector<std::string> letterO = {
     "       u.  ",
     " ...ue888b ",
     " 088R Y8a8r",
@@ -48,7 +48,7 @@ vector<string> letterO = {
     " \"*8a8*P\"  ",
     "   'Y\"     " };
 
-vector<string> letterR = {
+std::vector<std::string> letterR = {
     "   .u    .  ",
     " .d88B :@8c ",
     "=\"8888f8888r",
@@ -59,10 +59,10 @@ vector<string> letterR = {
     " ^\"8888*\"   ",
     "    \"Y\"     " };
 
-vector<string> wordMANOR = {
-    letterM[0] + string(51, ' '),
-    letterM[1] + string(51, ' '),
-    letterM[2] + string(51, ' '),
+std::vector<std::string> wordMANOR = {
+    letterM[0] + std::string(51, ' '),
+    letterM[1] + std::string(51, ' '),
+    letterM[2] + std::string(51, ' '),
     letterM[3] + " " + letterA[0] + " " + letterN[0] + " " + letterO[0] + " " + letterR[0],
     letterM[4] + " " + letterA[1] + " " + letterN[1] + " " + letterO[1] + " " + letterR[1],
     letterM[5] + " " + letterA[2] + " " + letterN[2] + " " + letterO[2] + " " + letterR[2],
@@ -74,7 +74,7 @@ vector<string> wordMANOR = {
     letterM[11] + " " + letterA[8] + " " + letterN[8] + " " + letterO[8] + " " + letterR[8]
 };
 
-vector<string> wordTHE = {
+std::vector<std::string> wordTHE = {
     "~~~888~~~ 888               ",
     "   888    888-~88e  e88~~8e ",
     "   888    888  888 d888  88b",
@@ -82,7 +82,7 @@ vector<string> wordTHE = {
     "   888    888  888 Y888    ,",
     "   888    888  888  \"88___/ " };
 
-vector < string> letterH = {
+std::vector<std::string> letterH = {
     "         .xHL        ",
     "      .-`a888hxxx~   ",
     "   .H8X  `%888*\"     ",
@@ -97,7 +97,7 @@ vector < string> letterH = {
     "       \"\"*8a8%~      "
 };
 
-vector < string> letterU = {
+std::vector<std::string> letterU = {
     "   x.    .    ",
     " .@a8k  z88u  ",
     "~\"8888 ^8a88  ",
@@ -109,7 +109,7 @@ vector < string> letterU = {
     "  `Y\"   'YP   "
 };
 
-vector < string> letterS {
+std::vector<std::string> letterS {
     "     .   <k",
     "   .@8Ned8\"",
     " .@^%8888\" ",
@@ -121,7 +121,7 @@ vector < string> letterS {
     "`   ^\"F    "
 };
 
-vector < string> letterE = {
+std::vector<std::string> letterE = {
     "     .u   ",
     "  ud8a88. ",
     ":888'8888.",
@@ -133,10 +133,10 @@ vector < string> letterE = {
     "   \"YP'   "
 };
 
-vector<string> wordHOUSE = {
-    letterH[0] + string(50, ' '),
-    letterH[1] + string(50, ' '),
-    letterH[2] + string(50, ' '),
+std::vector<std::string> wordHOUSE = {
+    letterH[0] + std::string(50, ' '),
+    letterH[1] + std::string(50, ' '),
+    letterH[2] + std::string(50, ' '),
     letterH[3] + " " + letterO[0] + " " + letterU[0] + letterS[0] + "  " + letterE[0],
     letterH[4] + " " + letterO[1] + " " + letterU[1] + letterS[1] + "  " + letterE[1],
     letterH[5] + " " + letterO[2] + " " + letterU[2] + letterS[2] + "  " + letterE[2],
@@ -148,10 +148,10 @@ vector<string> wordHOUSE = {
     letterH[11] + " " + letterO[8] + " " + letterU[8] + letterS[8] + "  " + letterE[8]
 };
 
-vector<string> tag_box = {
-    "\x1B[38;2;238;130;238m+\x1B[38;2;255;215;0m" + string(20, '-') +"\x1B[38;2;238;130;238m+",
+std::vector<std::string> tag_box = {
+    "\x1B[38;2;238;130;238m+\x1B[38;2;255;215;0m" + std::string(20, '-') +"\x1B[38;2;238;130;238m+",
     "\x1B[38;2;255;215;0m|      \x1B[38;2;130;150;160mMADE BY -     \x1B[38;2;255;215;0m|",
-    "\x1B[38;2;255;215;0m|" + string(20, ' ') + "|",
+    "\x1B[38;2;255;215;0m|" + std::string(20, ' ') + "|",
     "\x1B[38;2;255;215;0m| \x1B[38;2;255;190;160mHER LADYSHIP GAMES \x1B[38;2;255;215;0m|",
-    "\x1B[38;2;238;130;238m+\x1B[38;2;255;215;0m" + string(20, '-') + "\x1B[38;2;238;130;238m+"
+    "\x1B[38;2;238;130;238m+\x1B[38;2;255;215;0m" + std::string(20, '-') + "\x1B[38;2;238;130;238m+"
 };

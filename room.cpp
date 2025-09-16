@@ -1,54 +1,59 @@
 
+#include <algorithm>
+
 #include "room.h"
 #include "screens.h"
 
 // ----- Room Getters -----
+std::string Room::get_name() const { return name; }
+const std::vector<std::string>& Room::get_description() const { return description; }
+Coords Room::get_location() const { return location; }
+const std::vector<std::string>& Room::get_exits() const { return exits; }
 
-string Room::get_name() { return name; }
-vector<string> Room::get_description() { return description; }
-Coords Room::get_location() { return location; }
-vector<string> Room::get_exits() { return exits; }
-vector<Item>& Room::get_items() { return items; }
-vector<Object>& Room::get_objects() { return objects; }
+std::vector<Item>& Room::get_items() { return items; }
+std::vector<Object>& Room::get_objects() { return objects; }
+
+const std::vector<Item>& Room::get_items() const { return items; }
+const std::vector<Object>& Room::get_objects() const { return objects; }
 
 // ----- Room Setters -----
 
-void Room::set_item(Item i) { items.push_back(i); }
-void Room::set_object(Object o) { objects.push_back(o); }
-void Room::add_exit(string direction) { exits.push_back(direction); }
-void Room::set_description(string new_text, int text_num) {
+void Room::set_item(const Item & i) { items.push_back(i); }
+void Room::set_object(const Object & o) { objects.push_back(o); }
+void Room::add_exit(std::string direction) { exits.push_back(direction); }
+void Room::set_description(std::string new_text, int text_num) {
     description[text_num - 1] = new_text;
 }
 
 // ----- Locked Exits -----
 
-bool Room::is_exit_locked(const string& direction) const {
-    return find(locked_exits.begin(), locked_exits.end(), direction) != locked_exits.end();
+bool Room::is_exit_locked(const std::string& direction) const {
+    return std::find(locked_exits.begin(), locked_exits.end(), direction) != locked_exits.end();
 }
 
-void Room::lock_exit(const string& direction) {
+void Room::lock_exit(const std::string& direction) {
     if (!is_exit_locked(direction)) {
         locked_exits.push_back(direction);
     }
 }
 
-void Room::unlock_exit(const string& direction) {
-    auto it = find(locked_exits.begin(), locked_exits.end(), direction);
+void Room::unlock_exit(const std::string& direction) {
+    auto it = std::find(locked_exits.begin(), locked_exits.end(), direction);
     if (it != locked_exits.end()) {
         locked_exits.erase(it);
     }
 }
 
-bool Room::has_exit(const string& direction) const {
-    return find(exits.begin(), exits.end(), direction) != exits.end();
+bool Room::has_exit(const std::string& direction) const {
+    return std::find(exits.begin(), exits.end(), direction) != exits.end();
 }
 
 // ----- Other Class Functions -----
 
-string Room::room_direction_list() {
-    string direction_list;
+std::string Room::room_direction_list() {
+    std::string direction_list;
 
-    for (string& const direction : get_exits()) {
+    for (const std::string& direction : get_exits()) {
         bool is_locked = is_exit_locked(direction);
 
         if (is_locked) {
@@ -66,25 +71,21 @@ string Room::room_direction_list() {
     return direction_list;
 }
 
-string Room::room_item_list() {
-    string item_list;
-    for (Item item : get_items()) {
+std::string Room::room_item_list() {
+    std::string item_list;
+    for (const Item& item : get_items()) {
         item_list += item.get_name() + ", ";
     }
-    if (item_list.length() >= 2) {
-        item_list = item_list.substr(0, item_list.length() - 2);
-    }
+    if (!item_list.empty()) item_list.erase(item_list.size() - 2);
     return item_list;
 }
 
-string Room::room_interactable_list() {
-    string object_list;
-    for (Object object : get_objects()) {
+std::string Room::room_interactable_list() {
+    std::string object_list;
+    for (const Object& object : get_objects()) {
         object_list += object.get_name() + ", ";
     }
-    if (object_list.length() >= 2) {
-        object_list = object_list.substr(0, object_list.length() - 2);
-    }
+    if (!object_list.empty()) object_list.erase(object_list.size() - 2);
     return object_list;
 }
 
@@ -120,7 +121,7 @@ Room lounge("Lounge",
     "The air smells faintly of perfume and something sour beneath it."},
     { -1, 1 }, { "East" },
     {},
-    {}
+    { sofa, mantle_clock, fireplace }
 );
 
 Room kitchen("Kitchen",
@@ -135,106 +136,4 @@ Room kitchen("Kitchen",
 );
 
 // ----- Master Room List -----
-vector<Room> room_list = { porch, hallway, lounge, kitchen };
-
-// ----- Room Utility Functions -----
-
-Room* find_room_by_coords(vector<Room>& rooms, Coords target) {
-    for (Room& room : rooms) {
-        if (room.get_location().x == target.x && room.get_location().y == target.y) {
-            return &room;
-        }
-    }
-    return nullptr;
-}
-
-void change_room(string& question, vector<string>& option, Player& player, Room*& current_room,
-    string& error_message, GameState& game_state, vector<string>& prompt) {
-
-    question = "Which direction do you want to move?";
-    option = { "1. North" , "2. South", "3. East", "4. West", "", "5. Back to Menu" };
-    prompt = { "","","","","","","" };
-
-    bool waiting_for_input = true;
-    bool redraw = true;
-
-    while (waiting_for_input) {
-
-        if (redraw) {
-            show_explore_screen(player, current_room, question, error_message, option, prompt);
-            redraw = false;
-        }        
-
-        char key = _getch();
-
-        Coords current = player.get_location();
-        Coords new_location = current;
-
-        switch (key) {
-        case '1':
-            new_location.y += 1;  // North
-            waiting_for_input = false;
-            redraw = true;
-            break;
-        case '2':
-            new_location.y -= 1;  // South
-            waiting_for_input = false;
-            redraw = true;
-            break;
-        case '3':
-            new_location.x += 1;  // East
-            waiting_for_input = false;
-            redraw = true;
-            break;
-        case '4':
-            new_location.x -= 1;  // West
-            waiting_for_input = false;
-            redraw = true;
-            break;
-        case '5':
-            waiting_for_input = false;
-            redraw = true;
-            break;
-        default:
-            // Invalid input — stay in loop
-            break;
-        }
-
-        if (!waiting_for_input) {
-            Room* next_room = find_room_by_coords(room_list, new_location);
-
-            if (next_room != nullptr) {
-                // Figure out which direction was attempted
-                string direction;
-                if (new_location.y > current.y) direction = "North";
-                else if (new_location.y < current.y) direction = "South";
-                else if (new_location.x > current.x) direction = "East";
-                else if (new_location.x < current.x) direction = "West";
-
-                if (current_room->is_exit_locked(direction)) {
-                    error_message = "The door to the " + direction + " is locked.";
-                    waiting_for_input = true; // Stay in the loop
-                }
-                else {
-                    player.set_location(new_location);
-                    current_room = next_room;
-                    load_main_question(question, option);
-                    error_message = "";
-                }
-            }
-            else {
-                error_message = "You can't go that way. There's nothing there.";
-                waiting_for_input = true;
-            }
-
-        }
-    }
-
-    load_main_question(question, option);
-}
-
-void initialise_locked_doors() {
-    room_list[0].lock_exit("North");
-    room_list[1].lock_exit("West");
-    room_list[1].lock_exit("North");
-}
+std::vector<Room> room_list = { porch, hallway, lounge, kitchen };

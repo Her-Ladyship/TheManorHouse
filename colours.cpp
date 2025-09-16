@@ -4,7 +4,7 @@
 #include <tuple>
 #include<algorithm>
 
-vector<Colour> colours = {
+std::vector<Colour> colours = {
     {"pink",     "\x1B[38;2;255;105;180m"},  // Hot pink
     {"violet",   "\x1B[38;2;238;130;238m"},  // Orchid/Violet
     {"Lblue",    "\x1B[38;2;173;216;230m"},  // Light blue
@@ -38,19 +38,19 @@ vector<Colour> colours = {
 };
 
 void writing_reset() {
-    cout << "\x1B[0m";
+    std::cout << "\x1B[0m";
 }
 
-void colour(const string& colour_name) {
+void colour(const std::string& colour_name) {
     writing_reset();
     for (const auto& colour : colours) {
         if (colour.name == colour_name) {
-            cout << colour.code;
+            std::cout << colour.code;
         }
     }
 }
 
-string col(const string& colour_name) {
+std::string col(const std::string& colour_name) {
     for (const auto& colour : colours) {
         if (colour.name == colour_name) {
             return colour.code;
@@ -59,57 +59,57 @@ string col(const string& colour_name) {
     return "";
 }
 
-void bold_text(const string& colour_name) {
+void bold_text(const std::string& colour_name) {
     writing_reset();
-    string colour = col(colour_name);
+    std::string colour = col(colour_name);
     colour = "\x1B[1m" + colour;
-    cout << colour;
+    std::cout << colour;
 }
 
-void dim_text(const string& colour_name) {
+void dim_text(const std::string& colour_name) {
     writing_reset();
-    string colour = col(colour_name);
+    std::string colour = col(colour_name);
     colour = "\x1B[2m" + colour;
-    cout << colour;
+    std::cout << colour;
 }
 
-void italic_text(const string& colour_name) {
+void italic_text(const std::string& colour_name) {
     writing_reset();
-    string colour = col(colour_name);
+    std::string colour = col(colour_name);
     colour = "\x1B[3m" + colour;
-    cout << colour;
+    std::cout << colour;
 }
 
-void underline_text(const string& colour_name) {
+void underline_text(const std::string& colour_name) {
     writing_reset();
-    string colour = col(colour_name);
+    std::string colour = col(colour_name);
     colour = "\x1B[4m" + colour;
-    cout << colour;
+    std::cout << colour;
 }
 
-void blinking_text(const string& colour_name) {
+void blinking_text(const std::string& colour_name) {
     writing_reset();
-    string colour = col(colour_name);
+    std::string colour = col(colour_name);
     colour = "\x1B[5m" + colour;
-    cout << colour;
+    std::cout << colour;
 }
 
-void inverse_text(const string& colour_name) {
+void inverse_text(const std::string& colour_name) {
     writing_reset();
-    string colour = col(colour_name);
+    std::string colour = col(colour_name);
     colour = "\x1B[7m" + colour;
-    cout << colour;
+    std::cout << colour;
 }
 
-void strikethrough_text(const string& colour_name) {
+void strikethrough_text(const std::string& colour_name) {
     writing_reset();
-    string colour = col(colour_name);
+    std::string colour = col(colour_name);
     colour = "\x1B[9m" + colour;
-    cout << colour;
+    std::cout << colour;
 }
 
-string health_colour(int num) {
-    string colour;
+std::string health_colour(int num) {
+    std::string colour;
     if (num > 69) { colour = col("green"); }
     else if (num > 39 && num < 70) { colour = col("orange"); }
     else { colour = col("Lred"); }
@@ -119,9 +119,9 @@ string health_colour(int num) {
     return colour;
 }
 
-string apply_tinted_gradient(const string& line, int row_index) {
+std::string apply_tinted_gradient(const std::string& line, int row_index) {
     // Define base RGB colours for each letter in MANOR
-    vector<tuple<int, int, int>> base_colours = {
+    std::vector<std::tuple<int, int, int>> base_colours = {
         {255, 191, 0},   // amber
         {200, 160, 60},  // brass
         {200, 160, 60},  // brass
@@ -130,7 +130,7 @@ string apply_tinted_gradient(const string& line, int row_index) {
     };
 
     // Brightness multiplier fade from top to bottom
-    vector<float> fade = {
+    std::vector<float> fade = {
         0.40f, 0.46f, 0.52f,
         0.58f, 0.64f, 0.70f,
         0.76f, 0.82f, 0.88f,
@@ -141,30 +141,30 @@ string apply_tinted_gradient(const string& line, int row_index) {
     int slice1 = 26, slice2 = 12, slice3 = 14, slice4 = 12;
 
     auto tint = [](int r, int g, int b, float factor) {
-        r = min(255, int(r * factor));
-        g = min(255, int(g * factor));
-        b = min(255, int(b * factor));
-        return "\x1B[38;2;" + to_string(r) + ";" + to_string(g) + ";" + to_string(b) + "m";
+        r = std::min(255, int(r * factor));
+        g = std::min(255, int(g * factor));
+        b = std::min(255, int(b * factor));
+        return "\x1B[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
     };
 
     float brightness = fade[row_index];
-    string result;
+    std::string result;
 
-    result += tint(get<0>(base_colours[0]), get<1>(base_colours[0]), get<2>(base_colours[0]), brightness) +
+    result += tint(std::get<0>(base_colours[0]), std::get<1>(base_colours[0]), std::get<2>(base_colours[0]), brightness) +
               line.substr(0, slice1);
-    result += tint(get<0>(base_colours[1]), get<1>(base_colours[1]), get<2>(base_colours[1]), brightness) +
+    result += tint(std::get<0>(base_colours[1]), std::get<1>(base_colours[1]), std::get<2>(base_colours[1]), brightness) +
               line.substr(slice1, slice2);
-    result += tint(get<0>(base_colours[2]), get<1>(base_colours[2]), get<2>(base_colours[2]), brightness) +
+    result += tint(std::get<0>(base_colours[2]), std::get<1>(base_colours[2]), std::get<2>(base_colours[2]), brightness) +
               line.substr(slice1 + slice2, slice3);
-    result += tint(get<0>(base_colours[3]), get<1>(base_colours[3]), get<2>(base_colours[3]), brightness) +
+    result += tint(std::get<0>(base_colours[3]), std::get<1>(base_colours[3]), std::get<2>(base_colours[3]), brightness) +
               line.substr(slice1 + slice2 + slice3, slice4);
-    result += tint(get<0>(base_colours[4]), get<1>(base_colours[4]), get<2>(base_colours[4]), brightness) +
+    result += tint(std::get<0>(base_colours[4]), std::get<1>(base_colours[4]), std::get<2>(base_colours[4]), brightness) +
               line.substr(slice1 + slice2 + slice3 + slice4);
 
     return result;
 }
 
-string tint_house_char(char c) {
+std::string tint_house_char(char c) {
     switch (c) {
     case '%': case '*': case 'R': return col("crimson") + c;
     case '8': case 'd': return col("ice") + c;

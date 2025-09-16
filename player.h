@@ -7,28 +7,26 @@
 #include "item.h"
 #include "helpers.h"
 
-using namespace std;
-
 class Player {
 private:
-    string name;
+    std::string name;
     int health;
-    vector<Item> inventory;
+    std::vector<Item> inventory;
     Coords location;
 
 public:
     Player();
 
-    string get_name();
-    int get_health();
-    vector<Item>& get_inventory();
-    Coords get_location();
+    std::string get_name() const;
+    int get_health() const;
+    std::vector<Item>& get_inventory();                 // mutable access
+    const std::vector<Item>& get_inventory() const;     // read-only access
+    Coords get_location() const;
 
-    void set_name(string n);
+    void set_name(std::string n);
     void set_health(int h);
     void set_location(Coords c);
 
-    void add_to_inventory(Item i);
-    void remove_from_inventory_by_name(const string& item_name);
-    
+    void add_to_inventory(const Item& i);
+    void remove_from_inventory_by_name(const std::string& item_name);
 };

@@ -1,33 +1,26 @@
 
+#include <conio.h>
+
+#include "game.h"
+#include "actions.h"
 #include "room.h"
 #include "screens.h"
 #include "inventory.h"
+#include "keys.h"
+#include "ui_constants.h"
+#include "room_ops.h"
 
 // PROTOTYPES
-void game_loop();
-void take_item();
-void interact();
-
-// GLOBALS
-GameState game_state = TITLE;
-SortMode current_sort_mode = CHRONOLOGICAL;
-bool game_over = false;
-int selected_item_index = 0;
-int current_page = 0;
-int max_pages = 0;
-
-string error_message, question;
-vector<string> option = {"","","","","",""};
-vector<string> inv_hint = { "","","","","" };
-vector<string> prompt = {"","","","","","",""};
-Player player;
-Room* current_room;
+void game_loop(Game& g);
+void take_item(Game& g);
+void interact(Game& g);
 
 // MAIN
 int main() {
 
-	while (!game_over) {
-        game_loop();
+    Game g;
+	while (!g.game_over) {
+        game_loop(g);
 	}
 
 	return 0;
@@ -35,61 +28,61 @@ int main() {
 
 // FUNCTIONS
 
-void game_loop() {
+void game_loop(Game& g) {
 
-    switch (game_state) {
-    case TITLE: {
+    switch (g.game_state) {
+    case GameState::TITLE: {
         show_title_screen();
         system("pause>nul");
-        game_state = NAME_ENTRY;
+        g.game_state = GameState::NAME_ENTRY;
         system("CLS");
         break;
     }
-    case NAME_ENTRY: {
-        show_name_entry_screen(player);
+    case GameState::NAME_ENTRY: {
+        show_name_entry_screen(g.player);
         system("pause>nul");
         initialise_combination_recipes();
         initialise_locked_doors();
         initialise_puzzle_solutions();
-        load_main_question(question, option);
-        game_state = EXPLORE;
+        load_main_question(g.question, g.option);
+        g.game_state = GameState::EXPLORE;
         break;
     }
-    case EXPLORE: {
+    case GameState::EXPLORE: {
         bool redraw = true;
         bool waiting_for_input = true;
 
         while (waiting_for_input) {
 
             if (redraw) {
-                show_explore_screen(player, current_room, question, error_message, option, prompt);
+                show_explore_screen(g);
                 redraw = false;
             }
 
             char key = _getch();
             switch (key) {
             case '1':
-                error_message = "";
-                change_room(question, option, player, current_room, error_message, game_state, prompt);
+                g.error_message = "";
+                change_room(g);
                 waiting_for_input = false;
                 redraw = true;
                 break;
             case '2':
-                interact();
+                interact(g);
                 waiting_for_input = false;
                 redraw = true;
                 break;
             case '3':
-                take_item();
+                take_item(g);
                 waiting_for_input = false;
                 redraw = true;
                 break;
             case '4':
-                game_state = INVENTORY;
+                g.game_state = GameState::INVENTORY;
                 waiting_for_input = false;
                 break;
             case 'Q': case 'q':
-                game_over = true;
+                g.game_over = true;
                 waiting_for_input = false;
                 break;
             default:
@@ -98,82 +91,80 @@ void game_loop() {
         }
         break;
     }
-    case INVENTORY: {
+    case GameState::INVENTORY: {
         bool in_inventory = true;
         bool redraw = true;
-        question = "What would you like to do?";
-        option = { "1. Use an item","2. Combine items","3. Return to exploration","","","" };
-        selected_item_index = 0;
+        g.question = "What would you like to do?";
+        g.option = { "1. Use an item","2. Combine items","3. Return to exploration","","","" };
+        g.selected_item_index = 0;
 
         while (in_inventory) {
             if (redraw) {
-                show_inventory_screen(player, selected_item_index, inv_hint, question, option,
-                    current_sort_mode, current_page, max_pages);
+                show_inventory_screen(g);
                 redraw = false;
             }
 
             char key = _getch();
-            if (key == 0 || key == -32) {  // arrow key
+            if (key == Keys::Prefix0 || key == Keys::PrefixExt) {  // arrow key
                 key = _getch();  // get the actual key code
 
-                if (!player.get_inventory().empty()) {
+                if (!g.player.get_inventory().empty()) {
                     switch (key) {
-                    case 72:  // Up arrow
-                        if (selected_item_index > 0) {
-                            selected_item_index--;
-                            int new_page = selected_item_index / ITEMS_PER_PAGE;
-                            if (new_page != current_page) current_page = new_page;
+                    case Keys::ArrowUp:
+                        if (g.selected_item_index > 0) {
+                            g.selected_item_index--;
+                            int new_page = g.selected_item_index / ITEMS_PER_PAGE;
+                            if (new_page != g.current_page) g.current_page = new_page;
                             redraw = true;
                         }
                         break;
-                    case 80:  // Down arrow
-                        if (selected_item_index < player.get_inventory().size() - 1) {
-                            selected_item_index++;
-                            int new_page = selected_item_index / ITEMS_PER_PAGE;
-                            if (new_page != current_page) current_page = new_page;
+                    case Keys::ArrowDown:
+                        if (g.selected_item_index < g.player.get_inventory().size() - 1) {
+                            g.selected_item_index++;
+                            int new_page = g.selected_item_index / ITEMS_PER_PAGE;
+                            if (new_page != g.current_page) g.current_page = new_page;
                             redraw = true;
                         }
                         break;
-                    case 75: // Left arrow
-                        if (current_page > 0) {
-                            current_page--;
-                            selected_item_index = current_page * ITEMS_PER_PAGE;
+                    case Keys::ArrowLeft:
+                        if (g.current_page > 0) {
+                            g.current_page--;
+                            g.selected_item_index = g.current_page * ITEMS_PER_PAGE;
                             redraw = true;
                         }
                         break;
-                    case 77: // Right arrow
-                        if (current_page < max_pages) {
-                            current_page++;
-                            selected_item_index = current_page * ITEMS_PER_PAGE;
+                    case Keys::ArrowRight:
+                        if (g.current_page < g.max_pages) {
+                            g.current_page++;
+                            g.selected_item_index = g.current_page * ITEMS_PER_PAGE;
                             redraw = true;
                         }
                         break;
                     }
-                    inv_hint = { "","","","","" };
+                    g.inv_hint = make_blank_inv_hints();
                 }
             }
             else {
                 switch (key) {
                 case '1':
-                    use_item(player, selected_item_index, current_room, error_message, question, option, inv_hint, current_sort_mode,
-                                current_page, max_pages, game_state, prompt, in_inventory);
+                    use_item(g, in_inventory);
                     redraw = true;
                     break;
                 case '2':
-                    combine_items(player, selected_item_index, inv_hint, question, option,
-                                    current_sort_mode, max_pages, current_page);
+                    combine_items(g);
                     redraw = true;
                     break;
                 case '3':
                     in_inventory = false;
-                    game_state = EXPLORE;
-                    load_main_question(question, option);
-                    error_message = "";
-                    prompt = { "","","","","","","" };
-                    inv_hint = { "","","","","" };
+                    g.game_state = GameState::EXPLORE;
+                    load_main_question(g.question, g.option);
+                    g.error_message = "";
+                    g.prompt = make_blank_prompt();
+                    g.inv_hint = make_blank_inv_hints();
                     break;
                 case 's': case 'S':
-                    current_sort_mode = (current_sort_mode == CHRONOLOGICAL) ? ALPHABETICAL : CHRONOLOGICAL;
+                    g.current_sort_mode = (g.current_sort_mode == SortMode::CHRONOLOGICAL)
+                                           ? SortMode::ALPHABETICAL : SortMode::CHRONOLOGICAL;
                     redraw = true;
                     break;
                 }
@@ -181,11 +172,12 @@ void game_loop() {
         }
         break;
     }
-    case COMBAT: {
+    case GameState::COMBAT: {
         // combat stuff here
+        g.game_state = GameState::TITLE;
         break;
     }
-    case TESTING: {
+    case GameState::TESTING: {
         /*show_name_entry_screen(player);
         system("pause>nul");*/
         break;
@@ -193,137 +185,48 @@ void game_loop() {
     }
 }
 
-void take_item() {
-
-    vector<Item>& room_items = current_room->get_items();
-
-    if (room_items.empty()) {
-        error_message = "There's nothing here to take";
+void take_item(Game& g) {
+    // If there are no items here, skip the prompt entirely
+    if (g.current_room->get_items().empty()) {
+        g.error_message = "There's nothing here to take";
+        load_main_question(g.question, g.option);
+        g.prompt = make_blank_prompt();
         return;
     }
 
-    error_message = "";
+    g.error_message = "";
+    g.question = "";
+    g.option = make_blank_options();
+    g.prompt = { "", "What would you like to take?", "", "Type the item name and press Enter", "","","" };
+    show_explore_screen(g);
 
-    // Prompt message
-    question = "";
-    option = {"","","","","",""};
-    prompt = {"", "What would you like to take?", "", "Type the item name and press Enter", "","",""};
-    show_explore_screen(player, current_room, question, error_message, option, prompt);
+    std::string input;
+    std::getline(std::cin, input);
 
-    string input;
-    getline(cin, input);
-
-    string cleaned_input = capitalise_words(to_lower(input));
-
-    auto it = find_if(room_items.begin(), room_items.end(), [&](Item& item) {
-        return item.get_name() == cleaned_input;
-        });
-
-    if (it != room_items.end()) {
-        player.add_to_inventory(*it);
-        if (it->get_name() == "Knife") {
-            room_list[3].set_description("", 5);
-        }
-        error_message = "You took the " + it->get_name();
-        room_items.erase(it);
-    }
-    else {
-        error_message = "There's no " + cleaned_input + " to take";
-    }
-    load_main_question(question, option);
-    prompt = { "","","","","","","" };
+    std::string cleaned_input = capitalise_words(to_lower(input));
+    (void)logic_take_item(g, cleaned_input);
+    load_main_question(g.question, g.option);
+    g.prompt = make_blank_prompt();
 }
 
-void interact() {
-    string interaction_target;
-    question = "";
-    option = { "","","","","","" };
-    error_message = "";
-    prompt = { "", "", "What do you want to interact with?", "", "Type the curiosity name and press Enter","","" };
-    show_explore_screen(player, current_room, question, error_message, option, prompt);
-
-    getline(cin, interaction_target);
-    interaction_target = to_lower(interaction_target);
-    bool found = false;
-
-    for (Object& obj : current_room->get_objects()) {
-        if (to_lower(obj.get_name()) == interaction_target) {
-            found = true;
-
-            string type = obj.get_interaction_type();
-            
-            if (type == "unlock") {
-                if (!obj.has_been_used()) {
-                    obj.mark_used();
-
-                    current_room->unlock_exit(obj.get_unlock_direction());
-
-                    prompt = obj.get_result_text();
-                }
-                else {
-                    prompt = obj.get_repeat_text();
-                }
-            }
-            else if (type == "flavour") {
-                if (!obj.has_been_used()) {
-                    obj.mark_used();
-                    prompt = obj.get_result_text();
-                }
-                else {
-                    prompt = obj.get_repeat_text();
-                }
-            }
-            else if (type == "reveal") {
-                if (!obj.has_been_used()) {
-                    obj.mark_used();
-
-                    Item revealed = obj.get_revealed_item();
-                    player.add_to_inventory(revealed);
-
-                    prompt = obj.get_result_text();
-                    error_message = "You received the " + revealed.get_name();
-                }
-                else {
-                    prompt = obj.get_repeat_text();
-                }
-            }
-            else if (type == "puzzle") {
-                if (!obj.has_been_used()) {
-                    prompt = obj.get_result_text();
-                }
-                else {
-                    prompt = obj.get_repeat_text();
-                }
-            }
-            else if (type == "conditional") {
-                if (obj.is_locked()) {
-                    prompt = obj.get_result_text();
-                }
-                else {
-                    if (!obj.has_been_used()) {
-                        obj.mark_used();
-                        Item revealed = obj.get_revealed_item();
-                        player.add_to_inventory(revealed);
-
-                        prompt = obj.get_puzzle_success_text();
-                        error_message = "You received the " + revealed.get_name();
-                    }
-                    else {
-                        prompt = obj.get_repeat_text();
-                    }
-                }
-            }
-            else { // FAILSAFE
-                error_message = "Nothing happens. Yet.";
-                prompt = { "","","","","","","" };
-            }
-            load_main_question(question, option);
-        }
+void interact(Game& g) {
+    if (g.current_room->get_objects().empty()) {
+        g.error_message = "There's nothing here to interact with.";
+        load_main_question(g.question, g.option);
+        g.prompt = make_blank_prompt();
+        return;
     }
 
-    if (!found) {
-        error_message = "There's no " + capitalise_words(interaction_target) + " to interact with.";
-        load_main_question(question, option);
-        prompt = { "","","","","","","" };
-    }
+    g.question = "";
+    g.option = make_blank_options();
+    g.error_message = "";
+    g.prompt = { "", "", "What do you want to interact with?", "", "Type the curiosity name and press Enter","","" };
+    show_explore_screen(g);
+
+    std::string input;
+    std::getline(std::cin, input);
+
+    std::string lower = to_lower(input);
+    (void)logic_interact(g, lower);
+    load_main_question(g.question, g.option);
 }

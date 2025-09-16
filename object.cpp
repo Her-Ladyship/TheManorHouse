@@ -2,17 +2,18 @@
 #include "object.h"
 
 // ----- Method Definitions -----
-string Object::get_name() { return name; }
-string Object::get_interaction_type() { return interaction_type; }
-vector<string> Object::get_result_text() { return result_text; }
-vector<string> Object::get_repeat_text() { return repeat_text; }
-bool Object::has_been_used() { return used; }
+std::string Object::get_name() const { return name; }
+std::string Object::get_interaction_type() const { return interaction_type; }
+const std::vector<std::string>& Object::get_result_text() const { return result_text; }
+const std::vector<std::string>& Object::get_repeat_text() const { return repeat_text; }
+bool Object::has_been_used() const { return used; }
 void Object::mark_used() { used = true; }
-Item Object::get_revealed_item() { return revealed_item; }
+void Object::mark_unused() { used = false; }
+Item Object::get_revealed_item() const { return revealed_item; }
 void Object::add_revealed_item(Item i) { revealed_item = i; }
-string Object::get_unlock_direction() { return unlock_direction; }
-vector<string> Object::get_puzzle_success_text() { return puzzle_success_text; }
-bool Object::is_locked() { return locked; }
+std::string Object::get_unlock_direction() const { return unlock_direction; }
+const std::vector<std::string>& Object::get_puzzle_success_text() const { return puzzle_success_text; }
+bool Object::is_locked() const { return locked; }
 void Object::set_locked(bool val) { locked = val; }
 
 // ----- Objects -----
@@ -104,12 +105,12 @@ Object ceiling_fan("Ceiling Fan", "puzzle", // KITCHEN
     "You've already retrieved what you needed.",
     "",
     "" }, "", 
-    {"You jab the broom upward. The whistle drops",
+    {"",
+    "You jab the broom upward. The whistle drops",
     "with a metallic clink, landing by your feet.",
     "",
-    "You pocket the whistle.",
-    "The fan keeps spinning, slowly.",
-    "",
+    "You discard the broken broom and pocket",
+    "the whistle. The fan keeps spinning, slowly.",
     "" }, whistle);
 
 Object mirror("Mirror", "puzzle", // HALLWAY
@@ -175,3 +176,50 @@ Object kitchen_setting("Table Setting", "flavour", // KITCHEN
     "",
     "The chair remains tucked in."});
 
+Object sofa("Sofa", "flavour", // LOUNGE
+    {"You press a hand into the cushion.",
+    "Dust puffs up in a tired little cloud.",
+    "",
+    "The leather is worn and sticky.",
+    "Something creaks inside the frame.",
+    "",
+    "It doesn't look safe to sit."},
+    {"",
+    "You've seen enough of the sofa.",
+    "",
+    "It sighs when you touch it,",
+    "like an old lung puffing out air.",
+    "",
+    ""});
+
+Object mantle_clock("Clock", "reveal", // LOUNGE
+    {"A small clock ticks softly.",
+    "The hands show the wrong time.",
+    "",
+    "When you lift it, something rattles inside.",
+    "A piece slides free and clinks onto the hearth.",
+    "",
+    "You pocket the clock hand."},
+    {"",
+    "",
+    "The clock still ticks, faint and stubborn.",
+    "",
+    "Its face looks emptier without the hand.",
+    "",
+    ""}, "", {}, clock_hand);
+
+Object fireplace("Fireplace", "encounter", // LOUNGE
+    {"Cold ash slumps in the grate.",
+    "You lean closer. The smell is wrong,",
+    "too sweet and too sour.",
+    "",
+    "Something shifts in the darkness.",
+    "Bone scrapes against brick.",
+    "A skeleton pulls itself from the hearth."},
+    {"",
+    "",
+    "Blackened bricks, scattered ash.",
+    "",
+    "Whatever waited here is gone.",
+    "",
+    ""});

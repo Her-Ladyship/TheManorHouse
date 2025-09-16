@@ -6,21 +6,19 @@
 #include <map>
 #include <utility>
 
-using namespace std;
-
 class Item {
 private:
-    string name;
-    string desc;
-    vector<string> lore;
+    std::string name;
+    std::string desc;
+    std::vector<std::string> lore;
 
 public:
     Item() : name(""), desc(""), lore({}) {}
-    Item(string n, string d, vector<string> l) : name(n), desc(d), lore(l) {}
+    Item(std::string n, std::string d, std::vector<std::string> l) : name(n), desc(d), lore(l) {}
 
-    string get_name() const;
-    string get_desc();
-    vector<string> get_lore();
+    std::string get_name() const;
+    std::string get_desc() const;
+    const std::vector<std::string>& get_lore() const;
 };
 
 // Item declarations
@@ -43,14 +41,14 @@ extern Item teacup;
 extern Item milk_tooth;
 extern Item ticket;
 extern Item photo;
+extern Item clock_hand;
 
 // Combining stuff
-extern map<pair<string, string>, Item> combination_recipes;
-pair<string, string> make_combo_key(string a, string b);
+extern std::map<std::pair<std::string, std::string>, Item> combination_recipes;
+std::pair<std::string, std::string> make_combo_key(std::string a, std::string b);
 void initialise_combination_recipes();
 
 // Puzzle stuff
-extern map<pair<string, string>, bool> puzzle_recipes;
-pair<string, string> make_puzzle_key(string item, string object);
+extern std::map<std::pair<std::string, std::string>, bool> puzzle_recipes;
+std::pair<std::string, std::string> make_puzzle_key(std::string item, std::string object);
 void initialise_puzzle_solutions();
-

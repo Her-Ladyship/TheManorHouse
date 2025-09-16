@@ -7,52 +7,50 @@
 #include "helpers.h"
 #include "player.h"
 #include "object.h"
-#include "conio.h"
-
-using namespace std;
 
 class Room {
 private:
-    string name;
-    vector<string> description;
+    std::string name;
+    std::vector<std::string> description;
     Coords location;
-    vector<string> exits;
-    vector<Item> items;
-    vector<Object> objects;
-    vector<string> locked_exits;
+    std::vector<std::string> exits;
+    std::vector<Item> items;
+    std::vector<Object> objects;
+    std::vector<std::string> locked_exits;
 
 public:
-    Room(string n, vector<string> d, Coords l, vector<string> e, vector<Item> i, vector<Object> o)
+    Room(std::string n, std::vector<std::string> d, Coords l, std::vector<std::string> e, std::vector<Item> i, std::vector<Object> o)
         : name(n), description(d), location(l), exits(e), items(i), objects(o) {
     }
 
-    string get_name();
-    vector<string> get_description();
-    Coords get_location();
-    vector<string> get_exits();
-    vector<Item>& get_items();
-    vector<Object>& get_objects();
+    // getters
+    std::string get_name() const;
+    const std::vector<std::string>& get_description() const;
+    Coords get_location() const;
+    const std::vector<std::string>& get_exits() const;
 
-    void set_item(Item i);
-    void set_object(Object o);
-    void add_exit(string direction);
-    void set_description(string new_text, int text_num);
+    // mutable accessors (unchanged behaviour)
+    std::vector<Item>& get_items();
+    std::vector<Object>& get_objects();
 
-    bool is_exit_locked(const string& direction) const;
-    void lock_exit(const string& direction);
-    void unlock_exit(const string& direction);
-    bool has_exit(const string& direction) const;
+    // read-only accessors (new overloads)
+    const std::vector<Item>& get_items() const;
+    const std::vector<Object>& get_objects() const;
 
-    string room_direction_list();
-    string room_item_list();
-    string room_interactable_list();
+    void set_item(const Item & i);
+    void set_object(const Object & o);
+    void add_exit(std::string direction);
+    void set_description(std::string new_text, int text_num);
+
+    bool is_exit_locked(const std::string& direction) const;
+    void lock_exit(const std::string& direction);
+    void unlock_exit(const std::string& direction);
+    bool has_exit(const std::string& direction) const;
+
+    std::string room_direction_list();
+    std::string room_item_list();
+    std::string room_interactable_list();
 };
 
-// Function prototypes
-Room* find_room_by_coords(vector<Room>& rooms, Coords target);
-void change_room(string& question, vector<string>& option, Player& player, Room*& current_room,
-    string& error_message, GameState& game_state, vector<string>& prompt);
-void initialise_locked_doors();
-
 // Room list reference
-extern vector<Room> room_list;
+extern std::vector<Room> room_list;
