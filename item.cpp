@@ -60,7 +60,7 @@ Item lavender("Lavender Sachet", "A faded cloth pouch tied with lavender ribbon.
      "It was meant to be a gift, once." }
 );
 
-Item wax_finger("Wax Finger", "A pale wax replica of a human finger, slightly melted.", // STARTING ITEM
+Item wax_finger("Wax Finger", "A pale wax replica of a human finger, slightly melted.",
     { "It is warm to the touch, even in cold rooms.",
      "The nail is painted black, chipped at the edge.",
      "Holding it gives the vague sensation of",
@@ -68,7 +68,7 @@ Item wax_finger("Wax Finger", "A pale wax replica of a human finger, slightly me
      "It smells faintly of smoke and cloves." }
 );
 
-Item notebook("Notebook", "A water-damaged notebook with soft blue covers.", // STARTING ITEM
+Item notebook("Notebook", "A water-damaged notebook with soft blue covers.",
     { "The pages are warped, the ink half-faded.",
      "Only the last few entries are readable.",
      "They describe dreams you've had - or will have.",
@@ -80,8 +80,8 @@ Item salt_packet("Salt Packet", "A single-serve packet of salt, unopened.", // K
     { "It has no brand, no expiry date, no tear line.",
      "The grains inside move excitedly when shaken.",
      "You could swear it's heavier than it should be.",
-     "Every attempt to open it fails.",
-     "You're not sure what would happen if it did open." }
+     "Every attempt to open it fails, and",
+     "you're not sure what would happen if it did open." }
 );
 
 Item spare_key("Spare Key", "A tarnished brass key with no tag.", // HALLWAY
@@ -108,7 +108,7 @@ Item whistle("Whistle", "A polished metal whistle on a frayed cord.", // KITCHEN
      "It tastes faintly of copper." }
 );
 
-Item tarot("Tarot Card", "A card from a traditional tarot deck.", // STARTING ITEM
+Item tarot("Tarot Card", "A card from a traditional tarot deck.",
     { "Illustrated with a tower struck by lightning,",
      "people falling, arms flailing in panic.",
      "The ink is faded around the edges, like it's been drawn",
@@ -132,7 +132,7 @@ Item knife("Knife", "A kitchen knife with a thin, tapered blade.", // KITCHEN
      "It doesn't look like it's ever touched food." }
 );
 
-Item teacup("Teacup", "A fine porcelain teacup with hairline cracks.", // STARTING ITEM
+Item teacup("Teacup", "A fine porcelain teacup with hairline cracks.",
     { "The pattern depicts a hunting scene that seems to",
      "change every time you look away. There's a drop",
      "of something red dried near the rim.",
@@ -140,7 +140,7 @@ Item teacup("Teacup", "A fine porcelain teacup with hairline cracks.", // STARTI
      "It's never empty for long." }
 );
 
-Item milk_tooth("Milk Tooth", "A tooth wrapped in ribbon.", // STARTING ITEM
+Item milk_tooth("Milk Tooth", "A tooth wrapped in ribbon.",
     { "Too large for a child. Too small for an adult.",
      "It was left beneath a pillow long ago.",
      "Sometimes it clicks against itself",
@@ -148,7 +148,7 @@ Item milk_tooth("Milk Tooth", "A tooth wrapped in ribbon.", // STARTING ITEM
      "A dead message from another place." }
 );
 
-Item ticket("Ticket Stub", "A faded paper stub for an unknown event.", // STARTING ITEM
+Item ticket("Ticket Stub", "A faded paper stub for an unknown event.",
     { "No date. No location. Just a seat number:",
      "\"18G\". The ink glows faintly under candlelight.",
      "When you hold it and close your eyes",
@@ -156,7 +156,7 @@ Item ticket("Ticket Stub", "A faded paper stub for an unknown event.", // STARTI
      "and hear the low rumble of applause." }
 );
 
-Item photo("Photograph", "A black & white photo of a house that doesn't exist.", // STARTING ITEM
+Item photo("Photograph", "A black & white photo of a house that doesn't exist.",
     { "Blurry at the edges. Burnt at one corner.",
      "The windows are all lit,",
      "but there's no life inside.",
@@ -170,6 +170,62 @@ Item clock_hand("Clock Hand", "A thin metal clock hand, cool to the touch.", // 
      "",
      "It feels heavier than its size suggests, and",
      "holding it makes your own pulse feel off-beat.", }
+);
+
+Item curio_hook("Curio Hook", "A slender brass hook for lifting display lids.", // STARTER WEAPON (Curious)
+    { "Polished by other people's fingers;",
+     "made to lift lids and poke theories.",
+     "It remembers every \"Just a quick look\"...",
+     "and how that went.",
+     "You'll only check for a second. Honest." }
+);
+
+Item fire_axe("Fire Axe", "A wall-cabinet axe with chipped red paint.", // STARTER WEAPON (Brave)
+    { "The cabinet was already open;",
+     "someone braver or clumsier got there first.",
+     "It doesn't promise subtlety -",
+     "just results.",
+     "Try not to redecorate the doors." }
+);
+
+Item steel_parasol("Steel Parasol", "A collapsible parasol with a steel spine.", // STARTER WEAPON (Timid)
+    { "Looks delicate, acts decisive.",
+     "Open, it keeps weather and witnesses off you;",
+     "closed, it makes a very polite point.",
+     "If anyone asks,",
+     "it was self-defence from drizzle." }
+);
+
+Item paperweight("Paperweight", "A smooth black sphere, reassuringly heavy.", // STARTER WEAPON (Unbothered)
+    { "A small planet for your pocket; gravity included.",
+     "It rolls exactly where it wants,",
+     "usually towards the problem.",
+     "",
+     "Zen by way of bludgeoning." }
+);
+
+Item hearth_poker("Hearth Poker", "A dark iron rod with a blunt end.", // STARTER WEAPON (Fiery)
+    { "Raised in embers; opinionated about ash.",
+     "Good at rearranging coals,",
+     "better at rearranging attitudes.",
+     "If it glows, put it down -",
+     "unless the conversation is going badly." }
+);
+
+Item letter_opener("Letter Opener", "A tasteful brass blade for impatient readers.", // STARTER WEAPON (Precise)
+    { "Finds the seam in everything; envelopes,",
+     "arguments, the occasional knot.",
+     "Technically not a weapon,",
+     "which is exactly why it's worrying.",
+     "Please mind the stationery." }
+);
+
+Item ashwood_cane("Ashwood Cane", "A walking stick with a silver wolf's-head.", // STARTER WEAPON (Thoughtful)
+    { "Helps you stand; helps others fall down.",
+     "Tap-tap to think, swing-swing to conclude.",
+     "The wolf on top looks wise,",
+     "or at least convincingly judgmental.",
+     "Either way, he hates you." }
 );
 
 // Combining stuff

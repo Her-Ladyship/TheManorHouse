@@ -173,13 +173,33 @@ void game_loop(Game& g) {
         break;
     }
     case GameState::COMBAT: {
-        // combat stuff here
-        g.game_state = GameState::TITLE;
+        // Simple stub: show who you’re facing, then any key returns to EXPLORE.
+        system("CLS");
+        add_text(3, 4, "COMBAT (stub)", "Lred");
+        add_text(5, 4, "Enemy: " + (g.pending_encounter.empty() ? std::string("Unknown") : g.pending_encounter), "white");
+        add_text(7, 4, "Press any key to return to exploration...", "white");
+        //show_cursor(false);
+        (void)_getch();
+
+        // Important: DO NOT clear the Lounge lock here.
+        // We only clear it after a real victory later.
+        g.game_state = GameState::EXPLORE;
+        load_main_question(g.question, g.option);
+        g.error_message = "";
+        g.prompt = make_blank_prompt();
         break;
     }
     case GameState::TESTING: {
-        /*show_name_entry_screen(player);
-        system("pause>nul");*/
+        g.player.set_name("River");
+        g.player.add_to_inventory(curio_hook);
+        g.player.add_to_inventory(fire_axe);
+        g.player.add_to_inventory(steel_parasol);
+        g.player.add_to_inventory(paperweight);
+        g.player.add_to_inventory(hearth_poker);
+        g.player.add_to_inventory(letter_opener);
+        g.player.add_to_inventory(ashwood_cane);
+        load_main_question(g.question, g.option);
+        g.game_state = GameState::EXPLORE;
         break;
     }
     }

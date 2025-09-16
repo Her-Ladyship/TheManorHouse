@@ -10,7 +10,6 @@
 #include "ui_constants.h"
 
 struct Game {
-    // previous globals
     GameState game_state = GameState::TITLE;
     SortMode current_sort_mode = SortMode::CHRONOLOGICAL;
     bool game_over = false;
@@ -25,5 +24,7 @@ struct Game {
     std::vector<std::string> prompt = make_blank_prompt();
 
     Player player;
-    Room* current_room = nullptr; // matches previous behaviour
+    Room* current_room = nullptr;
+
+    std::string pending_encounter;
 };

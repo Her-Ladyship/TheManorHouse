@@ -227,13 +227,13 @@ void show_name_entry_screen(Player& player) {
     while (key == '0') {
         key = _getch();
         switch (key) {
-        case '1': style = "Curious";    start_item = teacup;     break;
-        case '2': style = "Brave";      start_item = milk_tooth; break;
-        case '3': style = "Timid";      start_item = photo;      break;
-        case '4': style = "Unbothered"; start_item = wax_finger; break;
-        case '5': style = "Fiery";      start_item = ticket;     break;
-        case '6': style = "Precise";    start_item = notebook;   break;
-        case '7': style = "Thoughtful"; start_item = tarot;      break;
+        case '1': style = "Curious";     start_item = curio_hook;      break;
+        case '2': style = "Brave";       start_item = fire_axe;        break;
+        case '3': style = "Timid";       start_item = steel_parasol;   break;
+        case '4': style = "Unbothered";  start_item = paperweight;     break;
+        case '5': style = "Fiery";       start_item = hearth_poker;    break;
+        case '6': style = "Precise";     start_item = letter_opener;   break;
+        case '7': style = "Thoughtful";  start_item = ashwood_cane;    break;
         default:
             key = '0';
             add_text(25, 50, "Just pick a bloody number", "Lred");

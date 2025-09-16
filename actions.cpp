@@ -81,9 +81,14 @@ bool logic_interact(Game& g, const std::string& lower_input) {
                 if (!obj.has_been_used()) {
                     obj.mark_used();
                     Item revealed = obj.get_revealed_item();
-                    g.player.add_to_inventory(revealed);
-                    g.prompt = obj.get_result_text();
-                    g.error_message = "You received the " + revealed.get_name();
+                    if (!revealed.get_name().empty()) {
+                        g.player.add_to_inventory(revealed);
+                        g.prompt = obj.get_result_text();
+                        g.error_message = "You received the " + revealed.get_name();
+                    }
+                    else {
+                        g.error_message = "";
+                    }
                 }
                 else {
                     g.prompt = obj.get_repeat_text();
@@ -105,9 +110,14 @@ bool logic_interact(Game& g, const std::string& lower_input) {
                     if (!obj.has_been_used()) {
                         obj.mark_used();
                         Item revealed = obj.get_revealed_item();
-                        g.player.add_to_inventory(revealed);
-                        g.prompt = obj.get_puzzle_success_text();
-                        g.error_message = "You received the " + revealed.get_name();
+                        if (!revealed.get_name().empty()) {
+                            g.player.add_to_inventory(revealed);
+                            g.prompt = obj.get_puzzle_success_text();
+                            g.error_message = "You received the " + revealed.get_name();
+                        }
+                        else {
+                            g.error_message = "";
+                        }
                     }
                     else {
                         g.prompt = obj.get_repeat_text();
@@ -122,6 +132,11 @@ bool logic_interact(Game& g, const std::string& lower_input) {
                     g.prompt = obj.get_result_text();
                     g.error_message = "Will you fight (F) or will you run (R)?";
 
+                    g_locked_room_name = g.current_room->get_name();
+                    if (g_locked_room_name == "Lounge") {
+                        g_locked_enemy_name = "Skeleton";
+                    }
+
                     // Draw the explore screen so player sees the reveal
                     show_explore_screen(g);
 
@@ -134,8 +149,6 @@ bool logic_interact(Game& g, const std::string& lower_input) {
                     if (ch == 'R') {
                         // 1) mark Lounge as blocked by the Skeleton
                         g_room_locked_by_enemy = true;
-                        g_locked_room_name = g.current_room->get_name();   // "Lounge"
-                        g_locked_enemy_name = "Skeleton";
 
                         // 2) shove the player through any unlocked exit
                         const bool moved = flee_through_any_unlocked_exit(g);
@@ -143,13 +156,12 @@ bool logic_interact(Game& g, const std::string& lower_input) {
                         // 3) UI
                         g.prompt = make_blank_prompt();
                         g.error_message = moved
-                            ? "You flee. The Skeleton bars the " + g_locked_room_name + "."
+                            ? "You flee. The " + g_locked_enemy_name + " bars the " + g_locked_room_name + "."
                             : "You back away, but there’s nowhere safe to go.";
                     }
                     else { // 'F'
                         // Hand off to combat
-                        // If you have a field like g.pending_encounter, set it here:
-                        // g.pending_encounter = "Skeleton";
+                        g.pending_encounter = g_locked_enemy_name;
                         g.game_state = GameState::COMBAT;
                         g.prompt = make_blank_prompt();
                         g.error_message = "";
@@ -177,7 +189,7 @@ bool logic_interact(Game& g, const std::string& lower_input) {
     return found;
 }
 
-static Room* find_adjacent_room_by_direction(Room* from, const std::string& dir) {
+Room* find_adjacent_room_by_direction(Room* from, const std::string& dir) {
     if (!from) return nullptr;
     Coords c = from->get_location();
     if (dir == "North")      c.y += 1;
@@ -194,7 +206,7 @@ static Room* find_adjacent_room_by_direction(Room* from, const std::string& dir)
 }
 
 // ---- Try every unlocked exit; move through the first that has a real neighbour ----
-static bool flee_through_any_unlocked_exit(Game& g) {
+bool flee_through_any_unlocked_exit(Game& g) {
     for (const std::string& dir : g.current_room->get_exits()) {
         if (!g.current_room->is_exit_locked(dir)) {
             if (Room* next = find_adjacent_room_by_direction(g.current_room, dir)) {
@@ -231,6 +243,7 @@ bool gate_enemy_locked_room_on_entry(Game& g, Room* target) {   // <-- no 'stati
         return false;                 // blocked; remain in current room
     }
     else {
+        g.pending_encounter = g_locked_enemy_name;
         g.game_state = GameState::COMBAT;  // hand off to combat
         return false;                 // intercepted navigation
     }

@@ -42,6 +42,13 @@ extern Item milk_tooth;
 extern Item ticket;
 extern Item photo;
 extern Item clock_hand;
+extern Item curio_hook;
+extern Item fire_axe;
+extern Item steel_parasol;
+extern Item paperweight;
+extern Item hearth_poker;
+extern Item letter_opener;
+extern Item ashwood_cane;
 
 // Combining stuff
 extern std::map<std::pair<std::string, std::string>, Item> combination_recipes;
