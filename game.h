@@ -25,10 +25,14 @@ struct Game {
     std::vector<std::string> option = make_blank_options();
     std::vector<std::string> inv_hint = make_blank_inv_hints();
     std::vector<std::string> prompt = make_blank_prompt();
+    std::vector<std::string> combat_lines = make_blank_combat_lines();
 
     Player player;
     Room* current_room = nullptr;
 
     std::string pending_encounter;
     std::vector<std::string> combat_log;
+
+    bool choosing_consumable = false;
+    int consumable_cursor = 0;
 };

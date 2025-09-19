@@ -42,7 +42,7 @@ static std::vector<std::string> build_consumables_list(const Player& p) {
     for (const auto& kv : count) {
         out.push_back(kv.first + " x" + std::to_string(kv.second));
     }
-    if (out.empty()) out.push_back("- none -");
+    if (out.empty()) out.push_back("       - none -");
     return out;
 }
 
@@ -570,20 +570,13 @@ void show_combat_screen(Game& g) {
     fit_lines(box1A_text);
 
     // 1C: Throwables list
+    auto throw_list = build_throwables_list(g.player);
     std::vector<std::string> box1C_text = { "", "THINGS TO THROW", "" };
-    for (const auto& s : build_throwables_list(g.player)) box1C_text.push_back(s);
+    for (const auto& s : throw_list) box1C_text.push_back(s);
     fit_lines(box1C_text);
 
     // 2A: Actions
-    std::vector<std::string> box2A_text = {
-        "", "WHAT WILL YOU DO?", "",
-        "1. Strike",
-        "2. Throw",
-        "3. Guard",
-        "4. Use Item",
-        "5. Flee",
-        "" // spare line
-    };
+    std::vector<std::string> box2A_text = g.combat_lines;
     fit_lines(box2A_text);
 
     // 2B: Combat log (older to newer, newest should be last line)
@@ -605,8 +598,9 @@ void show_combat_screen(Game& g) {
     fit_lines(box2B_text);  // keep your padding/trim guard
 
     // 2C: Consumables list
+    auto cons_list = build_consumables_list(g.player);          // keep the vector
     std::vector<std::string> box2C_text = { "", "CONSUMABLE ITEMS", "" };
-    for (const auto& s : build_consumables_list(g.player)) box2C_text.push_back(s);
+    for (const auto& s : cons_list) box2C_text.push_back(s);
     fit_lines(box2C_text);
 
     // ----- CLEAR & BUILD SCREEN -----
@@ -648,16 +642,50 @@ void show_combat_screen(Game& g) {
 
     // Bottom Boxes
     for (int i = 0; i < 10; i++) {
+        // QUESTIONS BOX
         std::cout << col("Lblue") << " |";
         if (i == 1) { std::cout << col("pink") << centre_text(box2A_text[i], 32); }
         else { std::cout << col("white") << "    " << std::setw(28) << std::left << box2A_text[i]; }
+        // COMBAT LOG BOX
         std::cout << col("Lblue") << "|";
         if (i == 8) { std::cout << col("Lred"); }
         else { std::cout << col("gold"); }
         std::cout << centre_text(box2B_text[i], 51) << col("Lblue") << "|";
-        if (i == 1) { std::cout << col("pink"); }
-        else { std::cout << col("violet"); }
-        std::cout << centre_text(box2C_text[i], 32) << col("Lblue") << "|\n";
+        // CONSUMABLES BOX
+        if (i == 0 || i == 2 || i == 9) {
+            // border/blank lines stay as you have them…
+            std::cout << col("violet") << std::setw(32) << std::left << box2C_text[i]
+                << col("Lblue") << "|\n";
+        }
+        else if (i == 1) {
+            std::cout << col("pink") << centre_text(box2C_text[i], 32)
+                << col("Lblue") << "|\n";
+        }
+        else {
+            // Real item rows start at index 3
+            const int first_row = 3;
+
+            // If list is just "- none -", treat as 0 rows
+            const bool list_is_none = (cons_list.size() == 1 && cons_list[0] == "       - none -");
+            const int real_rows = list_is_none ? 0 : static_cast<int>(cons_list.size());
+
+            // Is this a real row?
+            const bool this_is_item_row = (i >= first_row && i < first_row + real_rows);
+
+            // Which item-row index is this line (0..real_rows-1)?
+            const int item_row_index = i - first_row;
+
+            // Show arrow only when we're in choose mode and this row is selected
+            const bool show_arrow = g.choosing_consumable
+                && this_is_item_row
+                && (g.consumable_cursor >= 0)
+                && (g.consumable_cursor < real_rows)
+                && (item_row_index == g.consumable_cursor);
+
+            std::cout << col("white") << (show_arrow ? "  >  " : "     ")
+                << col("violet") << std::setw(27) << std::left << box2C_text[i]
+                << col("Lblue") << "|\n";
+        }
     }
 
     // Break

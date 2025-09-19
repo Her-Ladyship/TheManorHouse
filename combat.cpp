@@ -1,9 +1,11 @@
 
+#include <algorithm>
+#include <unordered_set>
+
 #include "combat.h"
 #include "player.h"
 #include "game.h"
-
-#include <algorithm>
+#include "keys.h"
 
 // Find the first consumable in the player's inventory; return its index or -1.
 static int find_first_consumable_index(const Player& p) {
@@ -41,4 +43,24 @@ void use_first_consumable(Game& g) {
     inv.erase(inv.begin() + idx);
 
     g.combat_log.push_back("You use the " + it.get_name() + ". (+" + std::to_string(heal) + " HP)");
+}
+
+// how many rows are in the Consumables panel (grouped by name)
+static int count_consumable_rows(const Player& p) {
+    std::unordered_set<std::string> names;
+    for (const Item& it : p.get_inventory())
+        if (it.is_consumable()) names.insert(it.get_name());
+    return static_cast<int>(names.size());
+}
+
+static void clamp_cons_cursor(Game& g) {
+    int n = count_consumable_rows(g.player);
+    if (n <= 0) { g.consumable_cursor = 0; return; }
+    if (g.consumable_cursor < 0)         g.consumable_cursor = 0;
+    if (g.consumable_cursor >= n)        g.consumable_cursor = n - 1;
+}
+
+// utility: does `raw` represent an arrow-prefix from _getch() ?
+static bool is_arrow_prefix(int raw) {
+    return raw == Keys::Prefix0 || raw == static_cast<unsigned char>(Keys::PrefixExt);
 }

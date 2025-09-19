@@ -12,4 +12,5 @@ namespace Keys {
     constexpr char ArrowDown = 80;
     constexpr char ArrowLeft = 75;
     constexpr char ArrowRight = 77;
+    constexpr char Escape = 27;
 }

@@ -1,5 +1,6 @@
 
 #include <conio.h>
+#include <unordered_set>
 
 #include "game.h"
 #include "actions.h"
@@ -15,6 +16,26 @@
 void game_loop(Game& g);
 void take_item(Game& g);
 void interact(Game& g);
+
+// FUNCTIONS I DON'T WANT TO BE HERE BUT SEEM TO HAVE TO BE
+static int count_consumable_rows(const Player& p) {
+    std::unordered_set<std::string> names;
+    for (const Item& it : p.get_inventory())
+        if (it.is_consumable()) names.insert(it.get_name());
+    return static_cast<int>(names.size());
+}
+
+static void clamp_cons_cursor(Game& g) {
+    int n = count_consumable_rows(g.player);
+    if (n <= 0) { g.consumable_cursor = 0; return; }
+    if (g.consumable_cursor < 0)         g.consumable_cursor = 0;
+    if (g.consumable_cursor >= n)        g.consumable_cursor = n - 1;
+}
+
+// utility: does `raw` represent an arrow-prefix from _getch() ?
+static bool is_arrow_prefix(int raw) {
+    return raw == Keys::Prefix0 || raw == static_cast<unsigned char>(Keys::PrefixExt);
+}
 
 // MAIN
 int main() {
@@ -224,6 +245,7 @@ void game_loop(Game& g) {
 
         bool in_combat = true;
         bool redraw = true;
+        load_combat_lines(g.combat_lines);
 
         while (in_combat) {
             if (redraw) {
@@ -232,6 +254,36 @@ void game_loop(Game& g) {
             }
 
             char key = _getch();
+            if (g.choosing_consumable) {
+                if (key == Keys::Prefix0 || key == Keys::PrefixExt) {
+                    int arrow = _getch();
+                    switch (arrow) {
+                    case Keys::ArrowUp: {
+                        if (g.consumable_cursor > 0) {
+                            --g.consumable_cursor;
+                            redraw = true;
+                        }
+                        break;
+                    }
+                    case Keys::ArrowDown: {
+                        int n = count_consumable_rows(g.player);
+                        if (g.consumable_cursor < n - 1) {
+                            ++g.consumable_cursor;
+                            redraw = true;
+                        }
+                        break;
+                    }
+                    }
+                    continue;
+                }
+                else if (key == Keys::Escape) {
+                    load_combat_lines(g.combat_lines);
+                    g.choosing_consumable = false;
+                    redraw = true;
+                    continue;
+                }
+                continue;
+            }
             switch (key) {
             case '1':
                 // strike
@@ -242,10 +294,38 @@ void game_loop(Game& g) {
             case '3':
                 // guard
                 break;
-            case '4':
-                use_first_consumable(g);
+            case '4': {
+                //if (g.choosing_consumable) break;
+
+                int rows = count_consumable_rows(g.player);
+                if (rows <= 0) {
+                    g.combat_log.push_back("You have no consumables.");
+                }
+                else {
+                    g.combat_lines = { "", "Using Consumable Menu", "", "", "",
+                                       "", "", "Press 'Enter' to select", "Press 'Escape' to return", ""};
+                    g.choosing_consumable = true;
+                    g.consumable_cursor = 0;
+                }
                 redraw = true;
                 break;
+            }
+            //case '4': {
+            //    int rows = count_consumable_rows(g.player);
+            //    if (rows <= 0) {
+            //        g.combat_log.push_back("You have no consumables.");
+            //    }
+            //    else {
+            //        //g.combat_lines = make_blank_combat_lines();
+            //        g.combat_lines = {"", "Using Consumable Menu", "", "", "",
+            //                          "", "", "Press 'Enter' to select", "Press 'Escape' to return", ""};
+            //        g.choosing_consumable = !g.choosing_consumable;   // toggle
+            //        if (g.choosing_consumable) g.consumable_cursor = 0;
+            //    }
+            //    redraw = true;
+            //    break;
+            //}
+
             case '5':
                 // flee
                 break;

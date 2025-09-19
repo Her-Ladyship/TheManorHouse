@@ -20,6 +20,7 @@ std::string centre_text(std::string input, int width);
 int numbers_error_check(int lower_bounds, int higher_bounds, GameState& game_state, std::string& error_message);
 void load_main_question(std::string& question, std::vector<std::string>& option);
 void load_inv_main_question(std::string& question, std::vector<std::string>& option);
+void load_combat_lines(std::vector<std::string>& combat_lines);
 std::string to_lower(const std::string& input);
 std::string capitalise_words(const std::string& input);
 std::string strip_ansi_codes(const std::string& input);

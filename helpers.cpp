@@ -81,6 +81,16 @@ void load_inv_main_question(std::string& question, std::vector<std::string>& opt
     option = { "1. Use an item","2. Combine items","3. Return to exploration","","","" };
 }
 
+void load_combat_lines(std::vector<std::string>& combat_lines) {
+    combat_lines = { "", "WHAT WILL YOU DO?", "",
+                      "1. Strike",
+                      "2. Throw",
+                      "3. Guard",
+                      "4. Use Item",
+                      "5. Flee",
+                      "" };
+}
+
 std::string to_lower(const std::string& input) {
     std::string result = input;
     std::transform(result.begin(), result.end(), result.begin(),
