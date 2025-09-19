@@ -51,6 +51,9 @@
     <ClCompile Include="room_ops.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="combat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="colours.h">
@@ -96,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="directions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="combat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

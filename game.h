@@ -10,13 +10,16 @@
 #include "ui_constants.h"
 
 struct Game {
-    GameState game_state = GameState::TITLE;
+    GameState game_state = GameState::TESTING;
     SortMode current_sort_mode = SortMode::CHRONOLOGICAL;
     bool game_over = false;
 
     int selected_item_index = 0;
     int current_page = 0;
     int max_pages = 0;
+
+    int enemy_hp = 0;
+    int enemy_hp_max = 0;
 
     std::string error_message, question;
     std::vector<std::string> option = make_blank_options();
@@ -27,4 +30,5 @@ struct Game {
     Room* current_room = nullptr;
 
     std::string pending_encounter;
+    std::vector<std::string> combat_log;
 };

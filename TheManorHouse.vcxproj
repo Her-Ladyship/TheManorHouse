@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="actions.cpp" />
     <ClCompile Include="colours.cpp" />
+    <ClCompile Include="combat.cpp" />
     <ClCompile Include="helpers.cpp" />
     <ClCompile Include="inventory.cpp" />
     <ClCompile Include="item.cpp" />
@@ -143,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="actions.h" />
     <ClInclude Include="colours.h" />
+    <ClInclude Include="combat.h" />
     <ClInclude Include="directions.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="helpers.h" />

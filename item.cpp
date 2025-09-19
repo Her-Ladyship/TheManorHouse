@@ -1,5 +1,6 @@
 
 #include "item.h"
+#include "colours.h"
 
 #include <map>
 #include <utility>
@@ -10,6 +11,16 @@
 std::string Item::get_name() const { return name; }
 std::string Item::get_desc() const { return desc; }
 const std::vector<std::string>& Item::get_lore() const { return lore; }
+
+bool Item::is_consumable() const { return consumable; }
+void Item::set_consumable(bool v) { consumable = v; }
+int Item::get_heal_amount() const { return heal_amount; }
+void Item::set_heal_amount(int v) { heal_amount = v; }
+
+bool Item::is_throwable() const { return throwable; }
+void Item::set_throwable(bool v) { throwable = v; }
+int  Item::get_damage_amount() const { return damage_amount; }
+void Item::set_damage_amount(int v) { damage_amount = v; }
 
 // ----- Item Definitions -----
 Item coin("Coin", "A worn brass coin with no visible markings.", // PORCH
@@ -36,13 +47,14 @@ Item bell("Bell", "A small handbell with a cracked mouth.", // HALLWAY
      "Its maker is unknown. Its purpose, uncertain." }
 );
 
-Item mirror_shard("Mirror Shard", "A jagged sliver of glass.", // HALLWAY
+Item mirror_shard("Mirror Shard", "A jagged sliver of glass.", // HALLWAY - THROWABLE 10DMG
     { "It reflects nothing. Not you, not the room,",
      "not even the light. When you turn it just so,",
      "you hear breathing - slow, shallow, and close.",
-     "It seems to bend on its own if ignored",
-     "as if trying to crack itself again." }
+     "It seems to bend on its own if ignored.",
+     "10 DMG" }
 );
+static bool _mirror_flags = (mirror_shard.set_throwable(true), mirror_shard.set_damage_amount(10), true);
 
 Item broken_fork("Broken Fork", "A silver fork with just one surviving tine.", // KITCHEN
     { "Not bent, but with two tines snapped off.",
@@ -124,13 +136,14 @@ Item broom("Broom", "A wooden broom with a scorched handle.", // PORCH
      "It seems too heavy for sweeping." }
 );
 
-Item knife("Knife", "A kitchen knife with a thin, tapered blade.", // KITCHEN
+Item knife("Knife", "A kitchen knife with a thin, tapered blade.", // KITCHEN - THROWABLE 15DMG
     { "You found it on the kitchen floor.",
      "Not dropped. Placed.",
-     "",
      "The edge gleams under the light.",
-     "It doesn't look like it's ever touched food." }
+     "It doesn't look like it's ever touched food.",
+     "15 DMG"}
 );
+static bool _knife_flags = (knife.set_throwable(true), knife.set_damage_amount(15), true);
 
 Item teacup("Teacup", "A fine porcelain teacup with hairline cracks.",
     { "The pattern depicts a hunting scene that seems to",
@@ -164,13 +177,14 @@ Item photo("Photograph", "A black & white photo of a house that doesn't exist.",
      "On the back, your name is written in ash." }
 );
 
-Item clock_hand("Clock Hand", "A thin metal clock hand, cool to the touch.", // LOUNGE
+Item clock_hand("Clock Hand", "A thin metal clock hand, cool to the touch.", // LOUNGE - THROWABLE 10 DMG
     { "It fell off of the clock in the lounge.",
      "Slightly bent at the tip, like it resisted turning.",
-     "",
      "It feels heavier than its size suggests, and",
-     "holding it makes your own pulse feel off-beat.", }
+     "holding it makes your own pulse feel off-beat.",
+     "10 DMG"}
 );
+static bool _chand_flags = (clock_hand.set_throwable(true), clock_hand.set_damage_amount(10), true);
 
 Item curio_hook("Curio Hook", "A slender brass hook for lifting display lids.", // STARTER WEAPON (Curious)
     { "Polished by other people's fingers;",
@@ -188,7 +202,7 @@ Item fire_axe("Fire Axe", "A wall-cabinet axe with chipped red paint.", // START
      "Try not to redecorate the doors." }
 );
 
-Item steel_parasol("Steel Parasol", "A collapsible parasol with a steel spine.", // STARTER WEAPON (Timid)
+Item steel_parasol("Parasol", "A collapsible parasol with a steel spine.", // STARTER WEAPON (Timid)
     { "Looks delicate, acts decisive.",
      "Open, it keeps weather and witnesses off you;",
      "closed, it makes a very polite point.",
@@ -204,7 +218,7 @@ Item paperweight("Paperweight", "A smooth black sphere, reassuringly heavy.", //
      "Zen by way of bludgeoning." }
 );
 
-Item hearth_poker("Hearth Poker", "A dark iron rod with a blunt end.", // STARTER WEAPON (Fiery)
+Item hearth_poker("Poker", "A dark iron rod with a blunt end.", // STARTER WEAPON (Fiery)
     { "Raised in embers; opinionated about ash.",
      "Good at rearranging coals,",
      "better at rearranging attitudes.",
@@ -228,6 +242,33 @@ Item ashwood_cane("Ashwood Cane", "A walking stick with a silver wolf's-head.", 
      "Either way, he hates you." }
 );
 
+Item bandage("Bandage", "A roll of linen secured with a pin.",  // CONSUMABLE 10HP
+    { "Not sterile, but clean enough to keep you moving.",
+     "Wrap, press, and breathe while the linen",
+     "finds its way to your wounds.",
+     "It smells faintly of soap and cupboards.",
+     "+ 10HP" }
+);
+static bool _bandage_flags = (bandage.set_consumable(true), bandage.set_heal_amount(10), true);
+
+Item field_dressing("Field Dressing", "A sealed pad with adhesive tape.",  // CONSUMABLE 20HP
+    { "The pad knows where the blood wants to go",
+     "and politely suggests it stay where it is.",
+     "Instructions exist, somewhere;",
+     "but you're doing fine without them.",
+     "+ 20HP"}
+);
+static bool _fd_flags = (field_dressing.set_consumable(true), field_dressing.set_heal_amount(20), true);
+
+Item rock("Rock", "A pocketable piece of bad ideas.",  // THROWABLE 5 DMG
+    { "Fits the hand and fits most problems - ",
+     "a solution you don't have to explain.",
+     "Heavy enough to matter,",
+     "and nobody will ask where you got it.",
+     "5 DMG"}
+);
+static bool _rock_flags = (rock.set_throwable(true), rock.set_damage_amount(5), true);
+
 // Combining stuff
 std::map<std::pair<std::string, std::string>, Item> combination_recipes;
 
@@ -235,13 +276,14 @@ std::pair<std::string, std::string> make_combo_key(std::string a, std::string b)
     return (a < b) ? std::make_pair(a, b) : std::make_pair(b, a);
 }
 
-Item salt_bomb("Salt Bomb", "A volatile mix of salt and lemon, wrapped in paper.",
+Item salt_bomb("Salt Bomb", "A volatile mix of salt and lemon, wrapped in paper.", // THROWABLE 20 DMG
     { "The moment the two touched, they reacted.",
      "You don't know how, but this is now something",
-     "you could throw at... something. You hope",
-     "you won't need to. It pulses faintly in your",
-     "bag like it resents existing." }
+     "you could throw at... something.",
+     "You hope you won't need to.",
+     "20 DMG" }
 );
+static bool _sb_flags = (salt_bomb.set_throwable(true), salt_bomb.set_damage_amount(20), true);
 
 Item toll_chime("Toll Chime", "A fused object that rings softly when ignored.",
     { "The bell no longer swings. The coin is embedded",

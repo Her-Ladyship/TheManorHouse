@@ -9,6 +9,7 @@
 #include "keys.h"
 #include "ui_constants.h"
 #include "room_ops.h"
+#include "combat.h"
 
 // PROTOTYPES
 void game_loop(Game& g);
@@ -36,6 +37,21 @@ void game_loop(Game& g) {
         system("pause>nul");
         g.game_state = GameState::NAME_ENTRY;
         system("CLS");
+        g.player.add_to_inventory(mirror_shard);
+        g.player.add_to_inventory(mirror_shard);
+        g.player.add_to_inventory(knife);
+        g.player.add_to_inventory(clock_hand);
+        g.player.add_to_inventory(rock);
+        g.player.add_to_inventory(field_dressing);
+        g.player.add_to_inventory(bandage);
+        g.player.add_to_inventory(bandage);
+        g.player.add_to_inventory(bandage);
+        g.player.add_to_inventory(bandage);
+        g.player.add_to_inventory(teacup);
+        g.player.add_to_inventory(paperweight);
+        g.player.add_to_inventory(lemon);
+        g.player.add_to_inventory(salt_packet);
+        g.player.add_to_inventory(bell);
         break;
     }
     case GameState::NAME_ENTRY: {
@@ -94,8 +110,7 @@ void game_loop(Game& g) {
     case GameState::INVENTORY: {
         bool in_inventory = true;
         bool redraw = true;
-        g.question = "What would you like to do?";
-        g.option = { "1. Use an item","2. Combine items","3. Return to exploration","","","" };
+        load_inv_main_question(g.question, g.option);
         g.selected_item_index = 0;
 
         while (in_inventory) {
@@ -164,7 +179,7 @@ void game_loop(Game& g) {
                     break;
                 case 's': case 'S':
                     g.current_sort_mode = (g.current_sort_mode == SortMode::CHRONOLOGICAL)
-                                           ? SortMode::ALPHABETICAL : SortMode::CHRONOLOGICAL;
+                        ? SortMode::ALPHABETICAL : SortMode::CHRONOLOGICAL;
                     redraw = true;
                     break;
                 }
@@ -190,20 +205,56 @@ void game_loop(Game& g) {
         break;
     }
     case GameState::TESTING: {
-        g.player.set_name("River");
-        g.player.add_to_inventory(curio_hook);
-        g.player.add_to_inventory(fire_axe);
-        g.player.add_to_inventory(steel_parasol);
-        g.player.add_to_inventory(paperweight);
-        g.player.add_to_inventory(hearth_poker);
-        g.player.add_to_inventory(letter_opener);
-        g.player.add_to_inventory(ashwood_cane);
-        load_main_question(g.question, g.option);
-        g.game_state = GameState::EXPLORE;
-        break;
+
+        if (g.player.get_name().empty()) { g.player.set_name("River"); }
+        if (g.player.get_inventory().empty()) {
+            g.player.add_to_inventory(mirror_shard);
+            g.player.add_to_inventory(mirror_shard);
+            g.player.add_to_inventory(knife);
+            g.player.add_to_inventory(clock_hand);
+            g.player.add_to_inventory(rock);
+            g.player.add_to_inventory(field_dressing);
+            g.player.add_to_inventory(bandage);
+            g.player.add_to_inventory(bandage);
+            g.player.add_to_inventory(teacup);
+            g.player.add_to_inventory(paperweight);
+        }
+        if (g.pending_encounter.empty()) { g.pending_encounter = "Skeleton"; }
+        g.player.set_health(10);
+
+        bool in_combat = true;
+        bool redraw = true;
+
+        while (in_combat) {
+            if (redraw) {
+                show_combat_screen(g);
+                redraw = false;
+            }
+
+            char key = _getch();
+            switch (key) {
+            case '1':
+                // strike
+                break;
+            case '2':
+                // throw
+                break;
+            case '3':
+                // guard
+                break;
+            case '4':
+                use_first_consumable(g);
+                redraw = true;
+                break;
+            case '5':
+                // flee
+                break;
+            }
+        }
     }
     }
 }
+
 
 void take_item(Game& g) {
     // If there are no items here, skip the prompt entirely

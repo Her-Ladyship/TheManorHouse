@@ -11,6 +11,10 @@ private:
     std::string name;
     std::string desc;
     std::vector<std::string> lore;
+    bool consumable = false;
+    int heal_amount = 0;
+    bool throwable = false;
+    int  damage_amount = 0;
 
 public:
     Item() : name(""), desc(""), lore({}) {}
@@ -19,6 +23,16 @@ public:
     std::string get_name() const;
     std::string get_desc() const;
     const std::vector<std::string>& get_lore() const;
+
+    bool is_consumable() const;
+    void set_consumable(bool v);
+    int  get_heal_amount() const;
+    void set_heal_amount(int v);
+
+    bool is_throwable() const;
+    void set_throwable(bool v);
+    int  get_damage_amount() const;
+    void set_damage_amount(int v);
 };
 
 // Item declarations
@@ -49,6 +63,9 @@ extern Item paperweight;
 extern Item hearth_poker;
 extern Item letter_opener;
 extern Item ashwood_cane;
+extern Item bandage;
+extern Item field_dressing;
+extern Item rock;
 
 // Combining stuff
 extern std::map<std::pair<std::string, std::string>, Item> combination_recipes;

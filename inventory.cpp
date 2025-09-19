@@ -7,10 +7,36 @@
 #include "keys.h"
 
 #include <conio.h>
-#include <algorithm>   // std::sort
-#include <utility>     // std::pair
-#include <string>      // std::string
-#include <vector>      // std::vector
+#include <algorithm>
+#include <utility>
+#include <string>
+#include <vector>
+#include <unordered_map>
+
+std::vector<DisplayRow> build_grouped_inventory(const Player& p, bool alphabetical) {
+    const auto& inv = p.get_inventory();
+    std::unordered_map<std::string, size_t> pos;
+    std::vector<DisplayRow> rows;
+    rows.reserve(inv.size());
+
+    for (int i = 0; i < static_cast<int>(inv.size()); ++i) {
+        const Item& it = inv[i];
+        auto itpos = pos.find(it.get_name());
+        if (itpos == pos.end()) {
+            pos[it.get_name()] = rows.size();
+            rows.push_back(DisplayRow{ it.get_name(), it.get_desc(), { i } });
+        }
+        else {
+            rows[itpos->second].indices.push_back(i);
+        }
+    }
+
+    if (alphabetical) {
+        std::sort(rows.begin(), rows.end(),
+            [](const DisplayRow& a, const DisplayRow& b) { return a.name < b.name; });
+    }
+    return rows;
+}
 
 void use_item(Game& g, bool& in_inv) {
 
@@ -19,9 +45,13 @@ void use_item(Game& g, bool& in_inv) {
         return;
     }
 
-    Item selected_item = g.player.get_inventory()[g.selected_item_index];
-    std::string item_name = selected_item.get_name();
+    auto rows = build_grouped_inventory(g.player, g.current_sort_mode == SortMode::ALPHABETICAL);
+    if (rows.empty()) { g.inv_hint = { "", "", "Your inventory is empty", "", "" }; return; }
+    if (g.selected_item_index >= static_cast<int>(rows.size())) g.selected_item_index = 0;
+    int real_index = rows[g.selected_item_index].indices.front();
+    Item selected_item = g.player.get_inventory()[real_index];
 
+    std::string item_name = selected_item.get_name();
     g.inv_hint = make_blank_inv_hints();
     g.question = "Use the " + item_name + " on what ? ";
     g.option = make_blank_options();
@@ -117,14 +147,19 @@ void combine_items(Game& g) {
             });
     }
 
-    std::vector<Item>& inventory = g.player.get_inventory();
+    auto rows = build_grouped_inventory(g.player,
+        g.current_sort_mode == SortMode::ALPHABETICAL);
 
-    if (inventory.size() < 2) {
+    // Need at least TWO total items:
+    if (rows.empty() || (rows.size() == 1 && rows[0].indices.size() < 2)) {
         g.inv_hint = { "", "You need at least two items", "", "to attempt a combination", "" };
         return;
     }
 
-    Item first = displayed_inventory[g.selected_item_index];
+    // FIRST selection
+    int first_row_index = g.selected_item_index;
+    const DisplayRow& firstRow = rows[first_row_index];
+    Item first = g.player.get_inventory()[firstRow.indices.front()];
     g.inv_hint = { "Select an item to", "", "combine with", "", first.get_name() };
 
     bool selecting = true;
@@ -136,6 +171,8 @@ void combine_items(Game& g) {
         g.question = "What will you combine?";
         g.option = { "1. Choose second item", "", "3. Return to inventory" };
         if (redraw) {
+            g.selected_item_index = second_index;
+            g.current_page = new_second_index;
             show_inventory_screen(g);
             redraw = false;
         }
@@ -153,16 +190,14 @@ void combine_items(Game& g) {
                     redraw = true;
                 }
                 break;
-
             case Keys::ArrowDown:
-                if (second_index < static_cast<int>(inventory.size()) - 1) {
+                if (second_index < static_cast<int>(rows.size()) - 1) {
                     second_index++;
                     int new_page = second_index / ITEMS_PER_PAGE;
                     if (new_page != new_second_index) new_second_index = new_page;
                     redraw = true;
                 }
                 break;
-
             case Keys::ArrowLeft:
                 if (new_second_index > 0) {
                     new_second_index--;
@@ -170,11 +205,11 @@ void combine_items(Game& g) {
                     redraw = true;
                 }
                 break;
-
             case Keys::ArrowRight:
                 if (new_second_index < g.max_pages) {
                     new_second_index++;
-                    second_index = new_second_index * ITEMS_PER_PAGE;
+                    second_index = std::min(new_second_index * ITEMS_PER_PAGE,
+                        static_cast<int>(rows.size()) - 1);
                     redraw = true;
                 }
                 break;
@@ -182,57 +217,88 @@ void combine_items(Game& g) {
         }
         else {
             switch (key) {
-            case '1':
-                if (second_index == g.selected_item_index) {
-                    g.inv_hint = { "You can't combine the", "", first.get_name(), "", "with itself" };
-                    load_inv_main_question(g.question, g.option);
-                    redraw = true;
-                    return;
-                }
-                else {
-                    Item second = displayed_inventory[second_index];
-                    auto key = make_combo_key(first.get_name(), second.get_name());
+            case '1': {
+                const DisplayRow& secondRow = rows[second_index];
+                Item second = g.player.get_inventory()[secondRow.indices.front()];
 
-                    if (combination_recipes.find(key) != combination_recipes.end()) {
-                        Item result = combination_recipes[key];
-
-                        // Find the positions of the selected items by name
-                        int index1 = -1, index2 = -1;
-                        for (int i = 0; i < static_cast<int>(inventory.size()); ++i) {
-                            if (inventory[i].get_name() == first.get_name() && index1 == -1) {
-                                index1 = i;
-                            }
-                            else if (inventory[i].get_name() == second.get_name() && index2 == -1) {
-                                index2 = i;
-                            }
-                        }
-
-                        // Now remove the items in correct order
-                        if (index1 > index2) {
-                            inventory.erase(inventory.begin() + index1);
-                            inventory.erase(inventory.begin() + index2);
-                        }
-                        else {
-                            inventory.erase(inventory.begin() + index2);
-                            inventory.erase(inventory.begin() + index1);
-                        }
-
-                        g.player.add_to_inventory(result);
-                        g.inv_hint = { "", "The items combined into", "", result.get_name(), "" };
+                // SAME ROW?
+                if (second_index == first_row_index) {
+                    const size_t copies = firstRow.indices.size();
+                    if (copies < 2) {
+                        // Not enough copies to self-combine
+                        g.inv_hint = { "", "You don't have enough", first.get_name(), "to combine", "" };
                         load_inv_main_question(g.question, g.option);
                         redraw = true;
+                        selecting = false;
+                        break;
+                    }
+
+                    // 2+ copies: check if a self-combo recipe even exists
+                    auto self_key = make_combo_key(first.get_name(), first.get_name());
+                    if (combination_recipes.find(self_key) == combination_recipes.end()) {
+                        g.inv_hint = { "", "The " + first.get_name(), "can't be combined", "with itself", "" };
+                        load_inv_main_question(g.question, g.option);
+                        redraw = true;
+                        selecting = false;
+                        break;
+                    }
+
+                    // OK to self-combine: remove two exact copies and add result
+                    Item result = combination_recipes[self_key];
+                    int index1 = firstRow.indices[0];
+                    int index2 = firstRow.indices[1];
+
+                    auto& inventory = g.player.get_inventory();
+                    if (index1 > index2) {
+                        inventory.erase(inventory.begin() + index1);
+                        inventory.erase(inventory.begin() + index2);
                     }
                     else {
-                        g.inv_hint = { "", "Nothing happened", "", "They don't seem to combine", "" };
-                        load_inv_main_question(g.question, g.option);
-                        g.selected_item_index = second_index;
-                        g.current_page = g.selected_item_index / ITEMS_PER_PAGE;
-                        redraw = true;
+                        inventory.erase(inventory.begin() + index2);
+                        inventory.erase(inventory.begin() + index1);
                     }
 
+                    g.player.add_to_inventory(result);
+                    g.inv_hint = { "", "The items combined into", "", result.get_name(), "" };
+                    load_inv_main_question(g.question, g.option);
                     selecting = false;
+                    redraw = true;
+                    break;
+                }
+
+                // DIFFERENT ROWS (normal path)
+                auto key = make_combo_key(first.get_name(), second.get_name());
+                if (combination_recipes.find(key) != combination_recipes.end()) {
+                    Item result = combination_recipes[key];
+
+                    // remove the specific copies selected (one from each row)
+                    int index1 = firstRow.indices.front();
+                    int index2 = secondRow.indices.front();
+
+                    auto& inventory = g.player.get_inventory();
+                    if (index1 > index2) {
+                        inventory.erase(inventory.begin() + index1);
+                        inventory.erase(inventory.begin() + index2);
+                    }
+                    else {
+                        inventory.erase(inventory.begin() + index2);
+                        inventory.erase(inventory.begin() + index1);
+                    }
+
+                    g.player.add_to_inventory(result);
+                    g.inv_hint = { "", "The items combined into", "", result.get_name(), "" };
+                    load_inv_main_question(g.question, g.option);
+                    selecting = false;
+                    redraw = true;
+                }
+                else {
+                    g.inv_hint = { "", "Nothing happened", "", "They don't seem to combine", "" };
+                    load_inv_main_question(g.question, g.option);
+                    selecting = false;
+                    redraw = true;
                 }
                 break;
+            }
             case '3':
                 g.inv_hint = { "", "", "Combination cancelled", "", "" };
                 load_inv_main_question(g.question, g.option);

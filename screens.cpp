@@ -7,6 +7,8 @@
 #include <iomanip>
 #include <algorithm>
 #include <cctype>
+#include <array>
+#include <unordered_map>
 
 #include "screens.h"
 #include "colours.h"
@@ -16,10 +18,51 @@
 #include "helpers.h"
 #include "room.h"
 #include "game.h"
+#include "inventory.h"
 
 const int ITEMS_PER_PAGE = 11;
 
+namespace {
+    constexpr size_t BOX_LINES = 10;
+
+    void fit_lines(std::vector<std::string>& v, size_t n = BOX_LINES) {
+        if (v.size() < n) v.insert(v.end(), n - v.size(), "");
+        else if (v.size() > n) v.resize(n);
+    }
+}
+
+static std::vector<std::string> build_consumables_list(const Player& p) {
+    std::unordered_map<std::string, int> count;
+    for (const Item& it : p.get_inventory()) {
+        if (it.is_consumable()) {
+            count[it.get_name()]++;
+        }
+    }
+    std::vector<std::string> out;
+    for (const auto& kv : count) {
+        out.push_back(kv.first + " x" + std::to_string(kv.second));
+    }
+    if (out.empty()) out.push_back("- none -");
+    return out;
+}
+
+static std::vector<std::string> build_throwables_list(const Player& p) {
+    std::unordered_map<std::string, int> count;
+    for (const Item& it : p.get_inventory()) {
+        if (it.is_throwable()) {
+            count[it.get_name()]++;
+        }
+    }
+    std::vector<std::string> out;
+    for (const auto& kv : count) {
+        out.push_back(kv.first + " x" + std::to_string(kv.second));
+    }
+    if (out.empty()) out.push_back("- none -");
+    return out;
+}
+
 void show_title_screen() {
+
     system("CLS");
 
     std::cout << col("violet") << " +" << col("Lblue") << std::string(117, '-') << col("violet") << "+\n";
@@ -72,6 +115,7 @@ void show_title_screen() {
 }
 
 void show_name_entry_screen(Player& player) {
+
     system("CLS");
 
     auto draw_border = [](std::string col1, std::string col2, int width) {
@@ -189,9 +233,9 @@ void show_name_entry_screen(Player& player) {
                 break; // Name accepted!
             }
             else if (confirm == 'n') {
-                add_text(20, 44, std::string(35, ' '), "white"); // Clear name box
-                add_text(25, 44, std::string(37, ' '), "white"); // Clear confirmation line
-                break; // We'll loop back to re-enter
+                add_text(20, 44, std::string(35, ' '), "white");
+                add_text(25, 44, std::string(37, ' '), "white");
+                break; // Loop again
             }
             else {
                 add_text(26, 52, "Please press Y or N", "Lred");
@@ -280,7 +324,7 @@ void show_explore_screen(Game& g) {
 
     system("CLS");
 
-    // Break
+    // Top Border
     std::cout << col("violet") << " +" << col("Lblue") << std::string(37, '-') << col("violet")
         << "+" << col("Lblue") << std::string(41, '-') << col("violet")
         << "+" << col("Lblue") << std::string(37, '-') << col("violet") << "+\n";
@@ -368,9 +412,32 @@ void show_inventory_screen(Game& g) {
     if (g.current_sort_mode == SortMode::ALPHABETICAL) { sort_type += "ALPHABETICAL"; }
     sort_type += ")";
 
-    int inv_size = static_cast<int>(g.player.get_inventory().size());
-    int total_pages = std::max(1, (inv_size + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE);
-    std::string page_info = "Page " + std::to_string(g.current_page + 1) + " / " + std::to_string(total_pages);
+    // Build grouped view
+    auto rows = build_grouped_inventory(g.player,
+        g.current_sort_mode == SortMode::ALPHABETICAL);
+    int inv_size = static_cast<int>(rows.size());
+
+    // Pages from grouped size
+    g.max_pages = (inv_size == 0) ? 0 : (inv_size - 1) / ITEMS_PER_PAGE;
+
+    // Clamp page & selection before we show anything
+    if (g.current_page > g.max_pages) g.current_page = g.max_pages;
+    if (g.current_page < 0)           g.current_page = 0;
+
+    if (inv_size == 0) {
+        g.selected_item_index = 0;
+    }
+    else {
+        if (g.selected_item_index < 0)         g.selected_item_index = 0;
+        if (g.selected_item_index >= inv_size) g.selected_item_index = inv_size - 1;
+    }
+
+    int start = g.current_page * ITEMS_PER_PAGE;
+    int end = std::min(start + ITEMS_PER_PAGE, inv_size);
+
+    int total_pages = g.max_pages + 1;
+    std::string page_info = "Page " + std::to_string(g.current_page + 1)
+        + " / " + std::to_string(total_pages);
 
     // Title line
     std::cout << col("Lblue") << " |     " << col("pink") << std::setw(30) << std::left << page_info << std::string(19, ' ')
@@ -388,40 +455,24 @@ void show_inventory_screen(Game& g) {
     std::cout << col("violet") << " +" << col("Lblue") << std::string(30, '-') << col("violet") << "+"
         << col("Lblue") << std::string(86, '-') << col("violet") << "+\n";
 
-    // Inventory listing
-    std::vector<Item> displayed_inventory = g.player.get_inventory();
-
-    if (g.current_sort_mode == SortMode::ALPHABETICAL) {
-        std::sort(displayed_inventory.begin(), displayed_inventory.end(),
-            [](Item& a, Item& b) {
-                return a.get_name() < b.get_name();
-            });
-    }
-
-    g.max_pages = (static_cast<int>(displayed_inventory.size()) - 1) / ITEMS_PER_PAGE;
+    // clamp selection to rows
+    if (!rows.empty() && g.selected_item_index >= inv_size) g.selected_item_index = inv_size - 1;
 
     std::cout << col("Lblue") << " |" << std::string(30, ' ') << "|" << std::string(86, ' ') << "|\n";
 
-    int start = g.current_page * ITEMS_PER_PAGE;
-    int end = std::min(start + ITEMS_PER_PAGE, static_cast<int>(displayed_inventory.size()));
-
     for (int i = start; i < end; ++i) {
-        Item item = displayed_inventory[i];
-        std::string name = item.get_name();
-        std::string desc = item.get_desc();
+        const auto& row = rows[i];
+        std::string name = row.name;
+        if (row.indices.size() > 1) name += " x" + std::to_string(row.indices.size());
 
         std::cout << " |  ";
-        if (i == g.selected_item_index) {
-            std::cout << col("white") << ">";
-        }
-        else {
-            std::cout << " ";
-        }
-        std::cout << "  " << col("violet") << std::setw(25) << std::left << name << col("Lblue") << "|  "
-            << col("white") << std::setw(84) << std::left << desc << col("Lblue") << "|\n";
+        if (i == g.selected_item_index) std::cout << col("white") << ">"; else std::cout << " ";
+        std::cout << "  " << col("violet") << std::setw(25) << std::left << name
+            << col("Lblue") << "|  " << col("white") << std::setw(84) << std::left << row.desc
+            << col("Lblue") << "|\n";
     }
 
-    for (int i = 0; i < ((ITEMS_PER_PAGE - (end - start) + 1)); i++) {
+    for (int i = 0; i < ((ITEMS_PER_PAGE - (end - start)) +1); i++) {
         std::cout << " |" << std::string(30, ' ') << "|" << std::string(86, ' ') << "|\n";
     }
 
@@ -432,20 +483,13 @@ void show_inventory_screen(Game& g) {
 
     std::cout << col("Lblue") << " |" << std::string(30, ' ') << "|" << std::string(56, ' ') << "|" << std::string(29, ' ') << "|\n";
 
-    // Get selected item's lore
+    Item selected;
     std::vector<std::string> lore_lines(5, "");
-
-    // Safety check — ensure selected index is valid
-    if (!displayed_inventory.empty()) {
-        if (g.selected_item_index >= static_cast<int>(displayed_inventory.size())) {
-            g.selected_item_index = 0;
-        }
-
-        Item selected = displayed_inventory[g.selected_item_index];
-        std::vector<std::string> item_lore = selected.get_lore();
-        for (size_t i = 0; i < item_lore.size() && i < 5; ++i) {
-            lore_lines[i] = item_lore[i];
-        }
+    if (!rows.empty()) {
+        int idx = rows[g.selected_item_index].indices.front();
+        selected = g.player.get_inventory()[idx];
+        auto item_lore = selected.get_lore();
+        for (size_t i = 0; i < item_lore.size() && i < 5; ++i) lore_lines[i] = item_lore[i];
     }
 
     // Render the screen section
@@ -460,8 +504,12 @@ void show_inventory_screen(Game& g) {
     std::cout << " |  " << col("white") << std::setw(28) << std::left << g.option[1] << col("Lblue")
         << "|" << col("violet") << centre_text(lore_lines[3], 56) << col("Lblue")
         << "|" << col("Lred") << centre_text(g.inv_hint[3], 29) << col("Lblue") << "|\n";
-    std::cout << " |  " << col("white") << std::setw(28) << std::left << g.option[2] << col("Lblue")
-        << "|" << col("violet") << centre_text(lore_lines[4], 56) << col("Lblue")
+    std::cout << " |  " << col("white") << std::setw(28) << std::left << g.option[2] << col("Lblue") << "|" << col("violet");
+
+    if (selected.is_consumable()) { std::cout << col("green"); }
+    if (selected.is_throwable()) { std::cout << col("Lred"); }
+
+    std::cout << centre_text(lore_lines[4], 56) << col("Lblue")
         << "|" << col("Lred") << centre_text(g.inv_hint[4], 29) << col("Lblue") << "|\n";
     std::cout << " |" << std::string(30, ' ') << "|" << std::string(56, ' ') << "|" << std::string(29, ' ') << "|\n";
 
@@ -472,4 +520,158 @@ void show_inventory_screen(Game& g) {
 
     // Input prompt
     std::cout << col("white") << " > ";
+}
+
+void show_combat_screen(Game& g) {
+
+    // Enemy basics
+    const std::string enemy_name = g.pending_encounter.empty() ? "Unknown" : g.pending_encounter;
+    const int enemy_hp = (g.enemy_hp > 0 ? g.enemy_hp : 10);
+    const int enemy_max = (g.enemy_hp_max > 0 ? g.enemy_hp_max : 10);
+
+    // Super lightweight "equipped weapon" guess:
+    // pick the first weapon found in inventory; fallback to "—".
+    static const std::vector<std::string> starter_weapons = {
+        "Curio Hook","Fire Axe","Parasol","Paperweight",
+        "Poker","Letter Opener","Ashwood Cane"
+    };
+    std::string equipped_weapon = "-";
+    for (const Item& it : g.player.get_inventory()) {
+        if (std::find(starter_weapons.begin(), starter_weapons.end(), it.get_name()) != starter_weapons.end()) {
+            equipped_weapon = it.get_name();
+            break;
+        }
+    }
+
+    std::vector<std::string> throwables;
+    std::vector<std::string> consumables;
+
+    if (g.combat_log.empty()) {
+        g.combat_log = {
+            "A " + enemy_name + " drags itself into view.",
+            "It seems calm."
+        };
+    }
+    
+    while (g.combat_log.size() > 7) g.combat_log.erase(g.combat_log.begin());
+
+    // ---- BUILD PANEL VECTORS ----
+
+    // 1A: Enemy panel
+    std::vector<std::string> box1A_text = {
+        "",
+        enemy_name,
+        "",
+        "HP: " + std::to_string(enemy_hp) + " / " + std::to_string(enemy_max),
+        "Status: Calm",            // placeholder; later: last action/temper
+        "Vulnerability: -",        // placeholder; easy to fill later
+        "", "", "", ""
+    };
+    fit_lines(box1A_text);
+
+    // 1C: Throwables list
+    std::vector<std::string> box1C_text = { "", "THINGS TO THROW", "" };
+    for (const auto& s : build_throwables_list(g.player)) box1C_text.push_back(s);
+    fit_lines(box1C_text);
+
+    // 2A: Actions
+    std::vector<std::string> box2A_text = {
+        "", "WHAT WILL YOU DO?", "",
+        "1. Strike",
+        "2. Throw",
+        "3. Guard",
+        "4. Use Item",
+        "5. Flee",
+        "" // spare line
+    };
+    fit_lines(box2A_text);
+
+    // 2B: Combat log (older to newer, newest should be last line)
+    // start with 10 empty lines
+    std::vector<std::string> box2B_text(10, "");
+
+    // Where we want lines to land (keep 7 blank as a spacer)
+    static const std::array<int, 7> LOG_SLOTS = { 1, 2, 3, 4, 5, 6, 8 };
+
+    // How many lines we can display at once
+    int n = std::min<int>(static_cast<int>(g.combat_log.size()), static_cast<int>(LOG_SLOTS.size()));
+
+    // Fill from newest to oldest into the chosen slots
+    for (int i = 0; i < n; ++i) {
+        const int src = static_cast<int>(g.combat_log.size()) - 1 - i;           // newest first
+        const int dst = LOG_SLOTS[static_cast<int>(LOG_SLOTS.size()) - 1 - i];   // 8,6,5,4,3,2,1
+        box2B_text[dst] = g.combat_log[src];
+    }
+    fit_lines(box2B_text);  // keep your padding/trim guard
+
+    // 2C: Consumables list
+    std::vector<std::string> box2C_text = { "", "CONSUMABLE ITEMS", "" };
+    for (const auto& s : build_consumables_list(g.player)) box2C_text.push_back(s);
+    fit_lines(box2C_text);
+
+    // ----- CLEAR & BUILD SCREEN -----
+    system("CLS");
+
+    // Top Border
+    std::cout << col("violet") << " +" << col("Lblue") << std::string(37, '-') << col("violet") << "+" << col("Lblue") << std::string(41, '-') << col("violet")
+        << "+" << col("Lblue") << std::string(37, '-') << col("violet") << "+\n";
+
+    // Title
+    std::cout << col("Lblue") << " |      " << col("pink") << "Name: " << col("violet")
+        << std::setw(24) << std::left << g.player.get_name() << col("Lblue") << " |           " << col("pink")
+        << " Health: " << health_colour(g.player.get_health()) << std::setw(3) << std::right << g.player.get_health() << "\x1B[0m"
+        << col("green") << " / 100            " << col("Lblue") << "|   " << col("pink")
+        << "Equipped Weapon: " << col("violet") << std::setw(17) << std::left << equipped_weapon
+        << col("Lblue") << "|\n";
+
+    // Break
+    std::cout << col("violet") << " +" << col("Lblue") << std::string(32, '-') << col("violet") << "+" << col("Lblue")
+        << std::string(4, '-') << col("violet") << "+" << col("Lblue") << std::string(41, '-') << col("violet")
+        << "+" << col("Lblue") << std::string(4, '-') << col("violet") << "+" << col("Lblue") << std::string(32, '-')
+        << col("violet") << "+\n";
+
+    // Top Boxes ------
+    for (int i = 0; i < 10; i++) {
+        std::cout << col("Lblue") << " |";
+        if (i == 1) { std::cout << col("Lred"); }
+        else { std::cout << col("white"); }
+        std::cout << centre_text(box1A_text[i], 32) << col("Lblue") << "|" << std::string(51, ' ') << "|";
+        if (i == 1) { std::cout << col("pink"); }
+        else { std::cout << col("violet"); }
+        std::cout << centre_text(box1C_text[i], 32) << col("Lblue") << "|\n";
+    }
+
+    // Break
+    std::cout << col("violet") << " +" << col("Lblue") << std::string(32, '-') << col("violet") << "+" << col("Lblue")
+        << std::string(51, '-') << col("violet") << "+" << col("Lblue") << std::string(32, '-')
+        << col("violet") << "+\n";
+
+    // Bottom Boxes
+    for (int i = 0; i < 10; i++) {
+        std::cout << col("Lblue") << " |";
+        if (i == 1) { std::cout << col("pink") << centre_text(box2A_text[i], 32); }
+        else { std::cout << col("white") << "    " << std::setw(28) << std::left << box2A_text[i]; }
+        std::cout << col("Lblue") << "|";
+        if (i == 8) { std::cout << col("Lred"); }
+        else { std::cout << col("gold"); }
+        std::cout << centre_text(box2B_text[i], 51) << col("Lblue") << "|";
+        if (i == 1) { std::cout << col("pink"); }
+        else { std::cout << col("violet"); }
+        std::cout << centre_text(box2C_text[i], 32) << col("Lblue") << "|\n";
+    }
+
+    // Break
+    std::cout << col("violet") << " +" << col("Lblue") << std::string(32, '-') << col("violet") << "+" << col("Lblue")
+        << std::string(51, '-') << col("violet") << "+" << col("Lblue") << std::string(32, '-')
+        << col("violet") << "+\n";
+
+    // Base error message box
+    std::cout << col("Lblue") << " |" << col("Lred") << centre_text(g.error_message, 117) << col("Lblue") << "|\n";
+
+    // Bottom border
+    std::cout << col("violet") << " +" << col("Lblue") << std::string(117, '-') << col("violet") << "+\n\n";
+
+    // Cursor line
+    std::cout << col("white") << " > ";
+
 }
