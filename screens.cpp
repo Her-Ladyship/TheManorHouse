@@ -32,15 +32,15 @@ namespace {
 }
 
 static std::vector<std::string> build_consumables_list(const Player& p) {
-    std::unordered_map<std::string, int> count;
+    std::map<std::string, int> count;
     for (const Item& it : p.get_inventory()) {
-        if (it.is_consumable()) {
-            count[it.get_name()]++;
-        }
+        if (it.is_consumable()) count[it.get_name()]++;
     }
     std::vector<std::string> out;
+    out.reserve(count.size());
     for (const auto& kv : count) {
-        out.push_back(kv.first + " x" + std::to_string(kv.second));
+        if (kv.second > 1) out.push_back(kv.first + " x" + std::to_string(kv.second));
+        else               out.push_back(kv.first);
     }
     if (out.empty()) out.push_back("       - none -");
     return out;
@@ -646,14 +646,15 @@ void show_combat_screen(Game& g) {
         std::cout << col("Lblue") << " |";
         if (i == 1) { std::cout << col("pink") << centre_text(box2A_text[i], 32); }
         else { std::cout << col("white") << "    " << std::setw(28) << std::left << box2A_text[i]; }
+
         // COMBAT LOG BOX
         std::cout << col("Lblue") << "|";
         if (i == 8) { std::cout << col("Lred"); }
         else { std::cout << col("gold"); }
         std::cout << centre_text(box2B_text[i], 51) << col("Lblue") << "|";
+
         // CONSUMABLES BOX
-        if (i == 0 || i == 2 || i == 9) {
-            // border/blank lines stay as you have them…
+        if (i == 0 || i == 2) {
             std::cout << col("violet") << std::setw(32) << std::left << box2C_text[i]
                 << col("Lblue") << "|\n";
         }
@@ -661,30 +662,37 @@ void show_combat_screen(Game& g) {
             std::cout << col("pink") << centre_text(box2C_text[i], 32)
                 << col("Lblue") << "|\n";
         }
-        else {
-            // Real item rows start at index 3
-            const int first_row = 3;
-
-            // If list is just "- none -", treat as 0 rows
-            const bool list_is_none = (cons_list.size() == 1 && cons_list[0] == "       - none -");
-            const int real_rows = list_is_none ? 0 : static_cast<int>(cons_list.size());
-
-            // Is this a real row?
-            const bool this_is_item_row = (i >= first_row && i < first_row + real_rows);
-
-            // Which item-row index is this line (0..real_rows-1)?
-            const int item_row_index = i - first_row;
-
-            // Show arrow only when we're in choose mode and this row is selected
-            const bool show_arrow = g.choosing_consumable
-                && this_is_item_row
-                && (g.consumable_cursor >= 0)
-                && (g.consumable_cursor < real_rows)
-                && (item_row_index == g.consumable_cursor);
-
-            std::cout << col("white") << (show_arrow ? "  >  " : "     ")
-                << col("violet") << std::setw(27) << std::left << box2C_text[i]
+        else if (i == 9) {
+            // footer line: always blank (or show a scroll hint if you like)
+            std::cout << col("violet") << std::setw(32) << std::left << ""
                 << col("Lblue") << "|\n";
+        }
+        else {
+            const int first_row = 3;     // first item line in the panel
+            const int visible_max = 6;     // rows 3..8 are six lines tall
+            const int line_idx = i - first_row;
+
+            std::string line_text;
+
+            if (g.choosing_consumable) {
+                // draw from the cached, windowed list
+                int row = g.consumable_top + line_idx;
+                if (row >= 0 && row < static_cast<int>(g.consumable_rows.size()))
+                    line_text = g.consumable_rows[row];
+                else
+                    line_text = "";
+                const bool show_arrow = (row == g.consumable_cursor);
+                std::cout << col("white") << (show_arrow ? "  >  " : "     ") << col("violet") << std::setw(27)
+                    << std::left << line_text << col("Lblue") << "|\n";
+            }
+            else {
+                if (line_idx < static_cast<int>(cons_list.size()))
+                    line_text = cons_list[line_idx];
+                else
+                    line_text = "";
+                std::cout << col("white") << "     " << col("violet") << std::setw(27) << std::left << line_text
+                    << col("Lblue") << "|\n";
+            }
         }
     }
 

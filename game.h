@@ -33,6 +33,10 @@ struct Game {
     std::string pending_encounter;
     std::vector<std::string> combat_log;
 
-    bool choosing_consumable = false;
-    int consumable_cursor = 0;
+    // Combat UI state (consumables)
+    bool choosing_consumable = false;      // arrow visible only when true
+    int  consumable_cursor = 0;          // absolute row index within the list
+    int  consumable_top = 0;          // first visible row in the panel (for scrolling)
+    std::vector<std::string> consumable_rows;  // cached "Name" or "Name xN" lines (grouped)
+
 };

@@ -1,6 +1,7 @@
 
 #include <conio.h>
 #include <unordered_set>
+#include <map>
 
 #include "game.h"
 #include "actions.h"
@@ -32,10 +33,73 @@ static void clamp_cons_cursor(Game& g) {
     if (g.consumable_cursor >= n)        g.consumable_cursor = n - 1;
 }
 
-// utility: does `raw` represent an arrow-prefix from _getch() ?
-static bool is_arrow_prefix(int raw) {
-    return raw == Keys::Prefix0 || raw == static_cast<unsigned char>(Keys::PrefixExt);
+static std::vector<std::string> build_consumable_rows(const Player& p) {
+    std::map<std::string, int> count;
+    for (const Item& it : p.get_inventory()) {
+        if (it.is_consumable()) count[it.get_name()]++;
+    }
+    std::vector<std::string> rows;
+    rows.reserve(count.size());
+    for (auto& kv : count) {
+        rows.push_back(kv.second > 1
+            ? kv.first + " x" + std::to_string(kv.second)
+            : kv.first);
+    }
+    return rows;
 }
+
+static void clamp_cons_list(Game& g, int VISIBLE = 6) {
+    int n = static_cast<int>(g.consumable_rows.size());
+    if (n <= 0) { g.consumable_cursor = 0; g.consumable_top = 0; return; }
+
+    if (g.consumable_cursor < 0)         g.consumable_cursor = 0;
+    if (g.consumable_cursor > n - 1)     g.consumable_cursor = n - 1;
+
+    if (g.consumable_top < 0)            g.consumable_top = 0;
+    if (g.consumable_top > std::max(0, n - VISIBLE))
+        g.consumable_top = std::max(0, n - VISIBLE);
+
+    if (g.consumable_cursor < g.consumable_top)
+        g.consumable_top = g.consumable_cursor;
+    if (g.consumable_cursor >= g.consumable_top + VISIBLE)
+        g.consumable_top = g.consumable_cursor - (VISIBLE - 1);
+}
+
+// Strip optional " xN" from a row like "Bandage x3" -> "Bandage"
+static std::string base_name_from_row(const std::string& row) {
+    auto pos = row.rfind(" x");
+    if (pos == std::string::npos) return row;
+    return row.substr(0, pos);
+}
+
+// Find first matching consumable by name; returns real inventory index or -1
+static int find_consumable_index_by_name(Player& p, const std::string& name) {
+    auto& inv = p.get_inventory();
+    for (int i = 0; i < (int)inv.size(); ++i) {
+        if (inv[i].is_consumable() && inv[i].get_name() == name) return i;
+    }
+    return -1;
+}
+
+// After consuming, rebuild the rows and keep cursor as close as possible to the same name
+static void rebuild_cons_rows_keep_cursor(Game& g, const std::string& prefer_name, int VISIBLE = 6) {
+    // Rebuild
+    g.consumable_rows = build_consumable_rows(g.player);
+
+    // Find the preferred name again (alphabetical list). If missing, clamp.
+    int n = (int)g.consumable_rows.size();
+    if (n == 0) { g.consumable_cursor = 0; g.consumable_top = 0; return; }
+
+    int new_cursor = -1;
+    for (int i = 0; i < n; ++i) {
+        if (base_name_from_row(g.consumable_rows[i]) == prefer_name) { new_cursor = i; break; }
+    }
+    if (new_cursor < 0) new_cursor = std::min(g.consumable_cursor, n - 1);
+
+    g.consumable_cursor = new_cursor;
+    clamp_cons_list(g, VISIBLE);
+}
+
 
 // MAIN
 int main() {
@@ -58,21 +122,15 @@ void game_loop(Game& g) {
         system("pause>nul");
         g.game_state = GameState::NAME_ENTRY;
         system("CLS");
-        g.player.add_to_inventory(mirror_shard);
-        g.player.add_to_inventory(mirror_shard);
-        g.player.add_to_inventory(knife);
-        g.player.add_to_inventory(clock_hand);
-        g.player.add_to_inventory(rock);
+        g.player.add_to_inventory(bandage);
         g.player.add_to_inventory(field_dressing);
-        g.player.add_to_inventory(bandage);
-        g.player.add_to_inventory(bandage);
-        g.player.add_to_inventory(bandage);
-        g.player.add_to_inventory(bandage);
-        g.player.add_to_inventory(teacup);
-        g.player.add_to_inventory(paperweight);
-        g.player.add_to_inventory(lemon);
-        g.player.add_to_inventory(salt_packet);
-        g.player.add_to_inventory(bell);
+        g.player.add_to_inventory(smelling_salts);
+        g.player.add_to_inventory(nice_cuppa);
+        g.player.add_to_inventory(suture_kit);
+        g.player.add_to_inventory(old_sandwich);
+        g.player.add_to_inventory(throat_sweet);
+        g.player.add_to_inventory(rotten_fish);
+        g.player.add_to_inventory(brandy);
         break;
     }
     case GameState::NAME_ENTRY: {
@@ -237,8 +295,15 @@ void game_loop(Game& g) {
             g.player.add_to_inventory(field_dressing);
             g.player.add_to_inventory(bandage);
             g.player.add_to_inventory(bandage);
-            g.player.add_to_inventory(teacup);
-            g.player.add_to_inventory(paperweight);
+            g.player.add_to_inventory(smelling_salts);
+            //g.player.add_to_inventory(nice_cuppa);
+            //g.player.add_to_inventory(nice_cuppa);
+            //g.player.add_to_inventory(nice_cuppa);
+            //g.player.add_to_inventory(suture_kit);
+            g.player.add_to_inventory(old_sandwich);
+            g.player.add_to_inventory(throat_sweet);
+            g.player.add_to_inventory(rotten_fish);
+            g.player.add_to_inventory(brandy);
         }
         if (g.pending_encounter.empty()) { g.pending_encounter = "Skeleton"; }
         g.player.set_health(10);
@@ -257,26 +322,69 @@ void game_loop(Game& g) {
             if (g.choosing_consumable) {
                 if (key == Keys::Prefix0 || key == Keys::PrefixExt) {
                     int arrow = _getch();
-                    switch (arrow) {
-                    case Keys::ArrowUp: {
-                        if (g.consumable_cursor > 0) {
-                            --g.consumable_cursor;
-                            redraw = true;
-                        }
-                        break;
+                    bool moved = false;
+                    if (arrow == Keys::ArrowUp) {
+                        int before = g.consumable_cursor;
+                        --g.consumable_cursor;
+                        clamp_cons_list(g);
+                        moved = (g.consumable_cursor != before);
                     }
-                    case Keys::ArrowDown: {
-                        int n = count_consumable_rows(g.player);
-                        if (g.consumable_cursor < n - 1) {
-                            ++g.consumable_cursor;
-                            redraw = true;
-                        }
-                        break;
+                    else if (arrow == Keys::ArrowDown) {
+                        int before = g.consumable_cursor;
+                        ++g.consumable_cursor;
+                        clamp_cons_list(g);
+                        moved = (g.consumable_cursor != before);
                     }
-                    }
+                    if (moved) redraw = true;
                     continue;
                 }
-                else if (key == Keys::Escape) {
+                if (key == Keys::Enter) {
+                    if (g.consumable_rows.empty()) { g.choosing_consumable = false; redraw = true; continue; }
+
+                    std::string row_text = g.consumable_rows[g.consumable_cursor];
+                    std::string name = base_name_from_row(row_text);
+                    int idx = find_consumable_index_by_name(g.player, name);
+
+                    if (idx < 0) {
+                        g.combat_log.push_back("It slips from your fingers.");
+                        rebuild_cons_rows_keep_cursor(g, name);
+                        redraw = true;
+                        continue;
+                    }
+
+                    auto& inv = g.player.get_inventory();
+                    Item it = inv[idx];
+                    int heal = it.get_heal_amount();
+
+                    const int MAX_HP = 100;
+                    int cur = g.player.get_health();
+
+                    if (heal > 0 && cur >= MAX_HP) {
+                        g.combat_log.push_back("That would be pointless now, wouldn't it.");
+                        redraw = true;
+                        continue;
+                    }
+
+                    int new_hp = cur + heal;
+                    if (new_hp > MAX_HP) new_hp = MAX_HP;
+                    if (new_hp < 0)      new_hp = 0;
+
+                    g.player.set_health(new_hp);
+                    inv.erase(inv.begin() + idx);
+
+                    std::string sign = (heal >= 0) ? "+" : "";
+                    g.combat_log.push_back("You used the " + it.get_name() + ". (" + sign + std::to_string(heal) + " HP)");
+
+                    rebuild_cons_rows_keep_cursor(g, name);
+                    if (g.consumable_rows.empty()) {
+                        load_combat_lines(g.combat_lines);
+                        g.choosing_consumable = false;
+                    }
+
+                    redraw = true;
+                    continue;
+                }
+                if (key == Keys::Escape) {
                     load_combat_lines(g.combat_lines);
                     g.choosing_consumable = false;
                     redraw = true;
@@ -284,6 +392,7 @@ void game_loop(Game& g) {
                 }
                 continue;
             }
+
             switch (key) {
             case '1':
                 // strike
@@ -295,37 +404,23 @@ void game_loop(Game& g) {
                 // guard
                 break;
             case '4': {
-                //if (g.choosing_consumable) break;
-
-                int rows = count_consumable_rows(g.player);
-                if (rows <= 0) {
-                    g.combat_log.push_back("You have no consumables.");
+                if (g.choosing_consumable) break;
+                g.consumable_rows = build_consumable_rows(g.player);
+                if (g.consumable_rows.empty()) {
+                    g.combat_log.push_back("What? Use what? You have nothing.");
+                    redraw = true;
                 }
                 else {
                     g.combat_lines = { "", "Using Consumable Menu", "", "", "",
-                                       "", "", "Press 'Enter' to select", "Press 'Escape' to return", ""};
+                                       "", "", "Press 'Enter' to select", "Press 'Escape' to return", "" };
                     g.choosing_consumable = true;
                     g.consumable_cursor = 0;
+                    g.consumable_top = 0;
+                    clamp_cons_list(g);
+                    redraw = true;
                 }
-                redraw = true;
                 break;
             }
-            //case '4': {
-            //    int rows = count_consumable_rows(g.player);
-            //    if (rows <= 0) {
-            //        g.combat_log.push_back("You have no consumables.");
-            //    }
-            //    else {
-            //        //g.combat_lines = make_blank_combat_lines();
-            //        g.combat_lines = {"", "Using Consumable Menu", "", "", "",
-            //                          "", "", "Press 'Enter' to select", "Press 'Escape' to return", ""};
-            //        g.choosing_consumable = !g.choosing_consumable;   // toggle
-            //        if (g.choosing_consumable) g.consumable_cursor = 0;
-            //    }
-            //    redraw = true;
-            //    break;
-            //}
-
             case '5':
                 // flee
                 break;

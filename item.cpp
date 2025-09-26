@@ -242,7 +242,7 @@ Item ashwood_cane("Ashwood Cane", "A walking stick with a silver wolf's-head.", 
      "Either way, he hates you." }
 );
 
-Item bandage("Bandage", "A roll of linen secured with a pin.",  // CONSUMABLE 10HP
+Item bandage("Bandage", "A roll of linen secured with a pin.",  // CONSUMABLE +10HP
     { "Not sterile, but clean enough to keep you moving.",
      "Wrap, press, and breathe while the linen",
      "finds its way to your wounds.",
@@ -251,7 +251,7 @@ Item bandage("Bandage", "A roll of linen secured with a pin.",  // CONSUMABLE 10
 );
 static bool _bandage_flags = (bandage.set_consumable(true), bandage.set_heal_amount(10), true);
 
-Item field_dressing("Field Dressing", "A sealed pad with adhesive tape.",  // CONSUMABLE 20HP
+Item field_dressing("Field Dressing", "A sealed pad with adhesive tape.",  // CONSUMABLE +20HP
     { "The pad knows where the blood wants to go",
      "and politely suggests it stay where it is.",
      "Instructions exist, somewhere;",
@@ -268,6 +268,70 @@ Item rock("Rock", "A pocketable piece of bad ideas.",  // THROWABLE 5 DMG
      "5 DMG"}
 );
 static bool _rock_flags = (rock.set_throwable(true), rock.set_damage_amount(5), true);
+
+Item smelling_salts("Smelling Salts", "A small brown vial of pungent crystals.", // CONSUMABLE +5HP
+    { "Crack the stopper and the world rushes back in.",
+     "It tells your nose to sit up straighter",
+     "and the body cannot help but obey.",
+     "It makes your eyes water and your brain buzz.",
+     "+ 5HP" }
+);
+static bool _smelling_salts_flags = (smelling_salts.set_consumable(true), smelling_salts.set_heal_amount(5), true);
+
+Item nice_cuppa("Nice Cuppa", "A chipped mug of strong, slightly sweet tea.", // CONSUMABLE +12HP
+    { "Still warm enough to do some good.",
+     "The smell reminds you of better times,",
+     "with a heavy blanket and a good book.",
+     "The steam rises in small swirls.",
+     "+ 12HP" }
+);
+static bool _nice_cuppa_flags = (nice_cuppa.set_consumable(true), nice_cuppa.set_heal_amount(12), true);
+
+Item suture_kit("Suture Kit", "A neat roll with needle, thread, and a wipe.", // CONSUMABLE +25HP
+    { "Not designed for artistry - only closure.",
+     "It's been a while since you've sewn anything,",
+     "and your handwriting in flesh will not win any prizes.",
+     "Still, the wound is sealed now.",
+     "+ 25HP" }
+);
+static bool _suture_kit_flags = (suture_kit.set_consumable(true), suture_kit.set_heal_amount(25), true);
+
+Item old_sandwich("Old Sandwich", "Bread of uncertain age and unknown filling.", // CONSUMABLE -5HP
+    { "You almost take a bite when your curiosity",
+     "outpaces your judgment. The scent hangs in the air,",
+     "practically indescribable. You regret the thought",
+     "immediately, which helps nothing.",
+     "- 5HP" }
+);
+static bool _old_sandwich_flags = (old_sandwich.set_consumable(true), old_sandwich.set_heal_amount(-5), true);
+
+Item rotten_fish("Rotten Fish", "A paper-wrapped fillet the sea, abandoned long ago.", // CONSUMABLE -8HP
+    { "The smell arrives before the idea;",
+     "and the idea was already terrible.",
+     "Salting the fish has done nothing to slow its decay.",
+     "You feel consistently worse for having looked at it.",
+     "- 8HP" }
+);
+static bool _rotten_fish_flags = (rotten_fish.set_consumable(true), rotten_fish.set_heal_amount(-8), true);
+
+Item throat_sweet("Throat Sweet", "A wrapped menthol lozenge from another era.", // CONSUMABLE +6HP
+    { "Soothing, a bit medicinal;",
+     "clears the fog behind your tongue.",
+     "Breathing feels easy work again, for a moment.",
+     "It's only a small help, but it's honest about it.",
+     "+ 6HP" }
+);
+static bool _throat_sweet_flags = (throat_sweet.set_consumable(true), throat_sweet.set_heal_amount(6), true);
+
+Item brandy("Brandy", "A pocket flask of something surprisingly decent.", // CONSUMABLE +14HP
+    { "The first mouthful tells your brain 'you're fine';",
+     "and the second one convinces the bruises.",
+     "The previous owner clearly had taste,",
+     "and most likely a forgetful demeanor.",
+     "+ 14HP" }
+);
+static bool _brandy_flags = (brandy.set_consumable(true), brandy.set_heal_amount(14), true);
+
 
 // Combining stuff
 std::map<std::pair<std::string, std::string>, Item> combination_recipes;

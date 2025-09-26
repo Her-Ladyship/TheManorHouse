@@ -66,6 +66,13 @@ extern Item ashwood_cane;
 extern Item bandage;
 extern Item field_dressing;
 extern Item rock;
+extern Item smelling_salts;
+extern Item nice_cuppa;
+extern Item suture_kit;
+extern Item old_sandwich;
+extern Item rotten_fish;
+extern Item throat_sweet;
+extern Item brandy;
 
 // Combining stuff
 extern std::map<std::pair<std::string, std::string>, Item> combination_recipes;
